@@ -25,6 +25,9 @@ namespace CapiValidation.Data
             return await secondaryResult.Where(spec.Criteria).ToListAsync();
         }
 
+        public virtual async Task<int> CountAsync()
+            => await _context.Set<T>().CountAsync();
+
         public virtual async Task<T> GetByIdAsync(params object[] id)
             => await _context.Set<T>().FindAsync(id);
     }

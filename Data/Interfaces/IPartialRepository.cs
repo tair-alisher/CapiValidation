@@ -9,6 +9,7 @@ namespace CapiValidation.Data.Interfaces
     {
         Task<IEnumerable<T>> ListAsync();
         Task<IEnumerable<T>> ListAsync(ISpecification<T> spec);
+        Task<int> CountAsync();
         Task<T> GetByIdAsync(params object[] id);
     }
 }

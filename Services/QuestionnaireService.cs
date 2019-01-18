@@ -23,5 +23,14 @@ namespace CapiValidation.Services
 
         public void Dispose()
             => _uow.Dispose();
+
+        public async Task<int> GetItemsAmountAsync()
+            => await _uow.GetPartialRepository<Questionnaire>().CountAsync();
+
+        public async Task<IEnumerable<Questionnaire>> GetPagedListAsync(int page, int pageSize)
+        {
+            var items = await _uow.GetPartialRepository<Questionnaire>().ListAsync();
+            return items.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+        }
     }
 }
