@@ -17,7 +17,7 @@ class QuestionnaireRepository extends ServiceEntityRepository
         parent::__construct($registry, Questionnaire::class);
     }
 
-    public function getAllQuestionnaires($currentPage = 1, $limit = 10) : object
+    public function getAllQuestionnaires($currentPage = 1, $limit = 10): object
     {
         $query = $this->createQueryBuilder('q')
             ->orderBy('q.title', 'ASC')

@@ -14,7 +14,7 @@ class QuestionnaireController extends AbstractController
      */
     public function index($page = 1)
     {
-        $limit = 5;
+        $limit = 15;
         $questionnaires = $this->getDoctrine()
             ->getRepository(Questionnaire::class, 'server')
             ->getAllQuestionnaires($page, $limit);
