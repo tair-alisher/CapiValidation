@@ -19,12 +19,11 @@ class QuestionnaireController extends AbstractController
             ->getRepository(Questionnaire::class, 'server')
             ->getAllQuestionnaires($page, $limit);
         $totalPages = ceil($questionnaires->count() / $limit);
-        $currentPage = $page;
 
         return $this->render('questionnaire/index.html.twig', [
             'questionnaires' => $questionnaires,
             'totalPages' => $totalPages,
-            'currentPage' => $currentPage
+            'currentPage' => $page
         ]);
     }
 }

@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Добавить проверку{% endblock %}
+
+{% block body %}
+<h4>Добавить проверку</h4>
+<hr>
+<div class="wrapper">
+  {{ form_start(form) }}
+    {{ form_widget(form) }}
+  {{ form_end(form) }}
+</div>
+{% endblock %}

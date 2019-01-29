@@ -11,12 +11,12 @@ doctrine:
         connections:
             default:
                 driver: '%env(LOCAL_DRIVER)%'
-                server_version: '%env(LOCAL_SERVER_VERSION)%'
+                # server_version: '%env(LOCAL_SERVER_VERSION)%'
                 charset: '%env(LOCAL_CHARSET)%'
-                default_table_options:
-                    charset: utf8mb4
-                    collate: utf8mb4_unicode_ci
                 url: '%env(LOCAL_URL)%'
+                # default_table_options:
+                #     charset: utf8mb4
+                #     collate: utf8mb4_unicode_ci
             server:
                 driver: '%env(REMOTE_DRIVER)%'
                 charset: '%env(REMOTE_CHARSET)%'
