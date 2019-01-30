@@ -10,7 +10,7 @@
     {% for questionnaire in questionnaires %}
     <tr>
       <td>{{ questionnaire.title }}</td>
-      <td><button type="button" class="btn btn-primary">action</button></td>
+      <td><a href="{{ path('questionnaire.errors', {id: questionnaire.id }) }}" class="btn btn-primary">Список ошибок</a></td>
     </tr>
     {% endfor %}
   </table>

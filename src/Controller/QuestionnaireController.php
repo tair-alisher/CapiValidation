@@ -2,10 +2,11 @@
 
 namespace App\Controller;
 
+use App\Entity\Remote\Questionnaire;
+use App\Repository\Main\CheckErrorRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\ORM\EntityManagerInterface;
-use App\Entity\Remote\Questionnaire;
 
 class QuestionnaireController extends AbstractController
 {
@@ -24,6 +25,18 @@ class QuestionnaireController extends AbstractController
             'questionnaires' => $questionnaires,
             'totalPages' => $totalPages,
             'currentPage' => $page
+        ]);
+    }
+
+    /**
+     * @Route("/questionnaire/{id}/errors", name="questionnaire.errors")
+     */
+    public function checkErrors(CheckErrorRepository $errorRepository, $id)
+    {
+        $errors = $errorRepository->getAllByQuestionnaireId($id);
+
+        return $this->render('questionnaire/check_errors.html.twig', [
+            'errors' => $errors
         ]);
     }
 }

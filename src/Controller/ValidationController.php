@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use App\Form\ValidateType;
 use App\Form\CreateValidationType;
 use App\Entity\Main\Validation;
+use App\Service\Validator;
 
 class ValidationController extends AbstractController
 {
@@ -35,33 +36,21 @@ class ValidationController extends AbstractController
      */
     public function create(
         Request $request,
-        ValidationRepository $validationRepository,
-        QuestionnaireRepository $questionnaireRepository,
-        RestraintRepository $restraintRepository)
+        QuestionnaireRepository $questionnaireRepo,
+        RestraintRepository $restraintRepo,
+        Validator $validator)
     {
         $validation = new Validation();
         $form = $this->createForm(CreateValidationType::class, $validation, [
-            'restraint_repository' => $restraintRepository,
-            'questionnaire_repository' => $questionnaireRepository
+            'restraint_repository' => $restraintRepo,
+            'questionnaire_repository' => $questionnaireRepo
         ]);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
-
-            var_dump($data);
-            return;
-
-            $questionnaire_title = $questionnaireRepository
-                ->find($data->getQuestionnaireId())
-                ->getTitle();
-            $validation->setQuestionnaireTitle($questionnaire_title);
-
-            $entityManager = $this->getDoctrine()->getManager('default');
-            $entityManager->persist($validation);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('validation');
+            if ($validator->createValidation($validation)) {
+                return $this->redirectToRoute('validation');
+            }
         }
 
         return $this->render('validation/create.html.twig', [
@@ -84,18 +73,23 @@ class ValidationController extends AbstractController
     /**
      * @Route("/validate", name="validate", methods={"GET", "POST"})
      */
-    public function validate(Request $request, QuestionnaireRepository $questionnaireRepository)
+    public function validate(Request $request, QuestionnaireRepository $questionnaireRepo, Validator $validator)
     {
         $form = $this->createForm(ValidateType::class, null, [
-            // 'action' => $this->generateUrl('validate'),
-            // 'method' => 'POST',
-            'questionnaire_repository' => $questionnaireRepository
+            'questionnaire_repository' => $questionnaireRepo
         ]);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
-            return $data['quarter'];
+            $questionnaireId = $form["questionnaire"]->getData();
+            $quarter = $form["quarter"]->getData();
+            $month = $form["month"]->getData();
+            $area = $form["area"]->getData();
+
+            if ($validator->validate($questionnaireId, $month)) {
+                return $this->redirectToRoute('questionnaire.errors', ['id' => $questionnaireId]);
+            }
         }
 
         return $this->render('validation/validate.html.twig', [

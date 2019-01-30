@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ошибки{% endblock %}
+
+{% block body %}
+<div class="wrapper">
+  <h4>Ошибки</h4>
+  <a href="{{ path('questionnaires') }}" class="btn btn-secondary">Назад</a>
+  <br>
+  <br>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Ошибка</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for error in errors %}
+        <tr>
+          <td>{{ error.description }}</td>
+          <td><a href="http://capi.stat.kg/Interview/Review/{{ error.interviewId }}" target="_blank" class="btn btn-primary">Просмотреть интервью</a></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -3,7 +3,6 @@
 namespace App\Entity\Main;
 
 use Doctrine\ORM\Mapping as ORM;
-use App\Entity\Main\Vaildation;
 
 /**
  * @ORM\Table(name="public.restraint")
@@ -27,16 +26,6 @@ class Restraint
      * @ORM\Column(type="string")
      */
     private $value;
-
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Main\Validation", mappedBy="restraint")
-     */
-    private $validations;
-
-    public function __construct()
-    {
-        $this->validations = new ArrayCollection();
-    }
 
     /**
      * Get id
@@ -86,15 +75,5 @@ class Restraint
     public function getValue()
     {
         return $this->value;
-    }
-
-    /**
-     * Get validations
-     *
-     * @return Validation[]
-     */
-    public function getValidations(): Collection
-    {
-        return $this->validations;
     }
 }

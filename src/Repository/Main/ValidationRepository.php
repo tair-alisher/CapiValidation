@@ -19,8 +19,8 @@ class ValidationRepository extends ServiceEntityRepository
 
     public function getAllByPages($currentPage = 1, $limit = 10): object
     {
-        $query = $this->createQueryBuilder('validation')
-            ->orderBy('validation.title')
+        $query = $this->createQueryBuilder('v')
+            ->orderBy('v.title', 'ASC')
             ->getQuery();
 
         $paginator = $this->paginate($query, $currentPage, $limit);
@@ -37,5 +37,15 @@ class ValidationRepository extends ServiceEntityRepository
             ->setMaxResults($limit);
 
         return $paginator;
+    }
+
+    public function getAllByQuestionnaireId($questionnaireId): array
+    {
+        $query = $this->createQueryBuilder('v')
+            ->andWhere('v.questionnaireId = :questionnaire_id')
+            ->setParameter('questionnaire_id', $questionnaireId)
+            ->getQuery();
+
+        return $query->execute();
     }
 }

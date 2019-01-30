@@ -83,7 +83,6 @@ select
 	coalesce(
 		interview.asstring,
 		cast(interview.asint as varchar),
-		cast(interview.asint as varchar),
 		cast(interview.aslong as varchar),
 		cast(interview.asdouble as varchar),
 		cast(interview.asdatetime as varchar),

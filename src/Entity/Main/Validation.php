@@ -3,7 +3,6 @@
 namespace App\Entity\Main;
 
 use Doctrine\ORM\Mapping as ORM;
-use App\Entity\Main\Restraint;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -57,11 +56,6 @@ class Validation
      * @ORM\Column(type="string", name="questionnaire_title")
      */
     private $questionnaireTitle;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Main\Restraint", inversedBy="validations")
-     */
-    private $restraint;
 
     public function __construct()
     {
@@ -236,28 +230,5 @@ class Validation
     public function getQuestionnaireTitle()
     {
         return $this->questionnaireTitle;
-    }
-
-    /**
-     * Set restraint
-     *
-     * @param ?Restraint $restraint
-     */
-
-    public function setRestraint(?Restraint $restraint): ?self
-    {
-        $this->restraint = $restraint;
-
-        return $this;
-    }
-
-    /**
-     * Get restraint
-     *
-     * @return ?Restraint $restraint
-     */
-    public function getRestraint(): ?Restraint
-    {
-        return $this->restraint;
     }
 }
