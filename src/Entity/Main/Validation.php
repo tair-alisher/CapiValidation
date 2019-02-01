@@ -20,43 +20,36 @@ class Validation
     /**
      * @ORM\Column(type="string")
      */
-    public $title;
+    private $title;
 
     /**
-     * @ORM\Column(type="string", name="question_id")
+     * @ORM\Column(type="string", name="answer_code")
      */
-    private $questionId;
+    private $answerCode;
 
     /**
-     * @ORM\Column(type="guid", name="restraint_id")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Main\InputValueType", inversedBy="validations")
      */
-    private $restraintId;
+    private $answerType;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Main\AnswerIndicator", iversedBy="validations")
      */
-    private $condition;
+    private $answerIndicatorType;
 
     /**
-     * @ORM\Column(type="string", name="related_question_id", nullable=true)
+     * @ORM\ManyToOne(targetEntity="App\Entity\Main\ComparedValueType", inversedBy="validations")
      */
-    private $relatedQuestionId = null;
+    private $relAnswerType;
 
     /**
-     * @ORM\Column(type="string", name="related_question_condition", nullable=true)
+     * @ORM\ManyToOne(targetEntity="App\Entity\Main\CompareOperator", inversedBy="validations")
      */
-    private $relatedQuestionCondition = null;
+    private $relAnswerCompareOperator;
 
     /**
-     * @ORM\Column(type="string", name="questionnaire_id")
+     * Set $id
      */
-    private $questionnaireId;
-
-    /**
-     * @ORM\Column(type="string", name="questionnaire_title")
-     */
-    private $questionnaireTitle;
-
     public function __construct()
     {
         $this->id = Uuid::uuid4();
@@ -73,162 +66,82 @@ class Validation
     }
 
     /**
-     * Set title
+     * Get $answerType
      *
-     * @param string $title
+     * @return App\Entity\Main\InputValueType
      */
-    public function setTitle($title)
+    public function getAnswerType(): ?InputValueType
     {
-        $this->title = $title;
+        return $this->answerType;
     }
 
     /**
-     * Get title
+     * Set $answerType
      *
-     * @return string $title
+     * @param App\Entity\Main\InputValueType
      */
-    public function getTitle()
+    public function setAnswerType(?InputValueType $type)
     {
-        return $this->title;
+        $this->answerType = $type;
     }
 
     /**
-     * Set questionId
+     * Get $answerIndicator
      *
-     * @param string $questionId
+     * @return App\Entity\Main\AnswerIndicator
      */
-    public function setQuestionId($questionId)
+    public function getAnswerIndicator(): ?AnswerIndicator
     {
-        $this->questionId = $questionId;
+        return $this->answerIndicator;
     }
 
     /**
-     * Get questionId
+     * Set $answerIndicator
      *
-     * @return string $questionId
+     * @return App\Entity\Main\AnswerIndicator
      */
-    public function getQuestionId()
+    public function setAnswerIndicator(?AnswerIndicator $indicator)
     {
-        return $this->questionId;
+        $this->answerIndicator = $indicator;
     }
 
     /**
-     * Set restraintId
+     * Get $relAnswerType
      *
-     * @param guid $restraintId
+     * @return App\Entity\Main\ComparedValueType
      */
-    public function setRestraintId($restraintId)
+    public function getRelAnswerType(): ?ComparedValueType
     {
-        $this->restraintId = $restraintId;
+        return $this->relAnswerType;
     }
 
     /**
-     * Get restraintId
+     * Set $relAnswerType
      *
-     * @return guid $restraintId
+     * @param App\Entity\Main\ComparedValueType
      */
-    public function getRestraintId()
+    public function setRelAnswerType(?ComparedValueType $type)
     {
-        return $this->restraintId;
+        $this->relAnswerType = $type;
     }
 
     /**
-     * Set condition
+     * Get $relAnswerCompareOperator
      *
-     * @param string $condition
+     * @return App\Entity\Main\CompareOperator
      */
-    public function setCondition($condition)
+    public function getRelAnswerCompareOperator(): ?CompareOperator
     {
-        $this->condition = $condition;
+        return $this->relAnswerCompareOperator;
     }
 
     /**
-     * Get condition
+     * Set $relAnswerCompareOperator
      *
-     * @return string $condition
+     * @param App\Entity\Main\CompareOperator
      */
-    public function getCondition()
+    public function setRelAnswerCompareOperator(?CompareOperator $compareOperator)
     {
-        return $this->condition;
-    }
-
-    /**
-     * Set relatedQuestionId
-     *
-     * @param string $relatedQuestionId
-     */
-    public function setRelatedQuestionId($relatedQuestionId)
-    {
-        $this->relatedQuestionId = $relatedQuestionId;
-    }
-
-    /**
-     * Get relatedQuestionId
-     *
-     * @return string $relatedQuestionId
-     */
-    public function getRelatedQuestionId()
-    {
-        return $this->relatedQuestionId;
-    }
-
-    /**
-     * Set relatedQuestionCondition
-     *
-     * @param string $relatedQuestionCondition
-     */
-    public function setRelatedQuestionCondition($relatedQuestionCondition)
-    {
-        $this->relatedQuestionCondition = $relatedQuestionCondition;
-    }
-
-    /**
-     * Get relatedQuestionCondition
-     *
-     * @return string $relatedQuestionCondition
-     */
-    public function getRelatedQuestionCondition()
-    {
-        return $this->relatedQuestionCondition;
-    }
-
-    /**
-     * Set questionnaireId
-     *
-     * @param string $questionnaireId
-     */
-    public function setQuestionnaireId($questionnaireId)
-    {
-        $this->questionnaireId = $questionnaireId;
-    }
-
-    /**
-     * Get questionnaireId
-     *
-     * @return string $questionnaireId
-     */
-    public function getQuestionnaireId()
-    {
-        return $this->questionnaireId;
-    }
-
-    /**
-     * Set questionnaireTitle
-     *
-     * @param string $questionnaireTitle
-     */
-    public function setQuestionnaireTitle($questionnaireTitle)
-    {
-        $this->questionnaireTitle = $questionnaireTitle;
-    }
-
-    /**
-     * Get questionnaireTitle
-     *
-     * @return string $questionnaireTitle
-     */
-    public function getQuestionnaireTitle()
-    {
-        return $this->questionnaireTitle;
+        $this->relAnswerCompareOperator = $compareOperator;
     }
 }

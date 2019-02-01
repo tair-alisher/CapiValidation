@@ -116,12 +116,3 @@ where
 	question_entity.stata_export_caption is not null and
 	summary.questionnaireidentity = 'a9320de7079d4a3795cde101f06bc2e2$2'
 limit 100
-
-
-
-insert into public.restraint(id, title, value) values('0906df78-1e78-40a0-9d43-c4e56b588b03', 'равно' ,'=');
-insert into public.restraint(id, title, value) values('5b86ce6c-f6a7-47f1-90c3-f19a85981a46', 'больше', '>');
-insert into public.restraint(id, title, value) values('ea33e523-fd92-4f4e-b185-f68693361e5b', 'меньше', '<');
-insert into public.restraint(id, title, value) values('3e02b849-aaa5-43bb-9cc6-e3d951867deb', 'не', '!');
-insert into public.restraint(id, title, value) values('2baf7693-d4f1-43ff-b697-1aaf6b45742c', 'больше или равно', '>=');
-insert into public.restraint(id, title, value) values('d66b8364-7e1d-4170-9a4f-b873baa504e5', 'меньше или равно', '<=');

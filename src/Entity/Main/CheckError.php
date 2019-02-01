@@ -32,6 +32,9 @@ class CheckError
      */
     private $description;
 
+    /**
+     * Set $id
+     */
     public function __construct()
     {
         $this->id = Uuid::uuid4();
