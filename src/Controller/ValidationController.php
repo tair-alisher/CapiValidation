@@ -13,6 +13,8 @@ use App\Form\CreateValidationType;
 use App\Entity\Main\Validation;
 use App\Service\Validator;
 
+use App\Repository\Remote\InterviewRepository;
+
 class ValidationController extends AbstractController
 {
     /**
@@ -59,14 +61,14 @@ class ValidationController extends AbstractController
     }
 
     /**
-     * @Route("/validation/test", name="validation.test")
+     * @Route("/validation/test/{questionnaireId}", name="validation.test")
      */
-    public function test(RestraintRepository $restraintRepository)
+    public function test(InterviewRepository $interviewRepo, $questionnaireId)
     {
-        $restraints = $restraintRepository->findAll();
+        $interviews = $interviewRepo->getInterviewsByQuestionnaireIdAndMonth($questionnaireId, 11);
 
         return $this->render('validation/test.html.twig', [
-            'restraints' => $restraints
+            'interviews' => $interviews
         ]);
     }
 

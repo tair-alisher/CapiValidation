@@ -33,7 +33,7 @@ class Validation
     private $answerType;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Main\AnswerIndicator", iversedBy="validations")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Main\AnswerIndicator", inversedBy="validations")
      */
     private $answerIndicatorType;
 

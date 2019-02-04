@@ -7,13 +7,25 @@
   <h4>Опросники</h4>
   <hr>
   <ol>
-    {% for restraint in restraints %}
-    <li>
-      <div class="row">
-        <div class="col-md-6">{{ restraint.title }}</div>
-        <div class="col-md-3">{{ restraint.value }}</div>
+    {% for interview in interviews %}
+    <div>
+      <p>ИД интервью: {{ interview.interviewId }}</p>
+      <p>ИД опроссника: {{ interview.questionnaireId }}</p>
+    </div>
+    <div class="row">
+      <div class="col-md-3">
+      {% for question in interview.questions %}
+        <p>{{ question }}</p>
+        <hr>
+      {% endfor %}
       </div>
-    </li>
+      <div class="col-md-9">
+      {% for answer in interview.answers %}
+        <p>{{ answer }}</p>
+        <hr>
+      {% endfor %}
+      </div>
+    </div>
     {% endfor %}
   </ol>
 {% endblock %}

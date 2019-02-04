@@ -1,0 +1,127 @@
+<?php
+
+namespace App\Repository\Remote;
+
+use App\Entity\Remote\Interview;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Symfony\Bridge\Doctrine\RegistryInterface;
+use Doctrine\ORM\Tools\Pagination\Paginator;
+
+/**
+ * InterviewRepository
+ */
+class InterviewRepository extends ServiceEntityRepository
+{
+    public function __construct(RegistryInterface $registry)
+    {
+        parent::__construct($registry, Interview::class);
+    }
+
+    public function getInterviewsByQuestionnaireIdAndMonth($questionnaireId, $month): array
+    {
+        // $query = $this->createQueryBuilder('interview')
+        //     ->innerJoin('interview.interviewId', 'interview_id')
+        //     ->innerJoin('interview_id.')
+        //     ->select('
+        //         COALESCE(
+        //             interview.answerIsString,
+        //             cast(interview.answerIsInt as varchar),
+        //             cast(interview.answerIsLong as varchar),
+        //             cast(interview.answerIsDouble as varchar),
+        //             cast(interview.answerIsDateTime as varchar),
+        //             cast(interview.answerIsList as varchar),
+        //             cast(interview.answerIsBool as varchar),
+        //             cast(interview.answerIsIntArray as varchar),
+        //             cast(interview.answerIsIntMatrix as varchar),
+        //             cast(interview.answerIsGps as varchar),
+        //             cast(interview.answerIsYesNo as varchar),
+        //             cast(interview.answerIsAudio as varchar),
+        //             cast(interview.answerIsArea as varchar),
+        //             :no_answer
+        //         ) as answer
+        //     ');
+        // $query->innerJoin('interview.interviewId', 'interview_id');
+
+        $conn = $this->getEntityManager('server')->getConnection();
+
+        $query = '
+        select
+            summary.summaryid as interview_id,
+            summary.questionnaireidentity as questionnaire_id,
+            question_entity.stata_export_caption as question,
+            coalesce(
+                interview.asstring,
+                cast(interview.asint as varchar),
+                cast(interview.aslong as varchar),
+                cast(interview.asdouble as varchar),
+                cast(interview.asdatetime as varchar),
+                cast(interview.aslist as varchar),
+                cast(interview.asbool as varchar),
+                cast(interview.asintarray as varchar),
+                cast(interview.asintmatrix as varchar),
+                cast(interview.asgps as varchar),
+                cast(interview.asyesno as varchar),
+                cast(interview.asaudio as varchar),
+                cast(interview.asarea as varchar),
+                :no_answer
+            ) as answer,
+            summary.updatedate as updatedat
+        from
+            readside.interviews as interview
+        join
+            readside.interviews_id as interview_id
+        on
+            interview.interviewid = interview_id.id
+        join
+            readside.interviewsummaries as summary
+        on
+            interview_id.interviewid = summary.interviewid
+        join
+            readside.questionnaire_entities as question_entity
+        on
+            interview.entityid = question_entity.id
+        where
+            extract(month from summary.updatedate) = :month and
+            question_entity.stata_export_caption is not null and
+            summary.questionnaireidentity = :questionnaire_id
+        limit 100
+        ';
+
+        $stmt = $conn->prepare($query);
+        $stmt->execute([
+            'questionnaire_id' => $questionnaireId,
+            'month' => $month,
+            'no_answer' => 'без ответа'
+        ]);
+
+        $rows = $stmt->fetchAll();
+
+        // $subArrayIndex = array_search($row['interview_id'], array_column($interviews, 'interview_id'));
+        // $interviews[$subArrayIndex];
+        $interviews = [];
+        foreach ($rows as $row) {
+            $filterResults = array_filter($interviews, function ($_interview) use ($row) {
+                return $_interview->getInterviewId() == $row['interview_id'];
+            });
+            if (count($filterResults) > 0) {
+                $interview = $filterResults[0];
+                $questions = $interview->getQuestions();
+                array_push($questions, $row['question']);
+                $interview->setQuestions($questions);
+                $answers = $interview->getAnswers();
+                array_push($answers, $row['answer']);
+                $interview->setAnswers($answers);
+            } else {
+                $interview = new Interview();
+                $interview->setInterviewId($row['interview_id']);
+                $interview->setQuestionnaireId($row['questionnaire_id']);
+                $interview->setQuestions(array($row['question']));
+                $interview->setAnswers(array($row['answer']));
+
+                array_push($interviews, $interview);
+            }
+        }
+
+        return $interviews;
+    }
+}
