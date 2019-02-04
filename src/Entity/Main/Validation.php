@@ -3,6 +3,8 @@
 namespace App\Entity\Main;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollections;
+use Doctrine\Common\Collections\Collection;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -35,7 +37,17 @@ class Validation
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Main\AnswerIndicator", inversedBy="validations")
      */
-    private $answerIndicatorType;
+    private $answerIndicator;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Main\ComparedValue", mappedBy="validation")
+     */
+    private $comparedValues;
+
+    /**
+     * @ORM\Column(type="string", name="rel_answer_code")
+     */
+    private $relAnswerCode;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Main\ComparedValueType", inversedBy="validations")
@@ -49,10 +61,12 @@ class Validation
 
     /**
      * Set $id
+     * Set $comparedValues
      */
     public function __construct()
     {
         $this->id = Uuid::uuid4();
+        $this->comparedValues = new ArrayCollection();
     }
 
     /**
@@ -103,6 +117,36 @@ class Validation
     public function setAnswerIndicator(?AnswerIndicator $indicator)
     {
         $this->answerIndicator = $indicator;
+    }
+
+    /**
+     * Get $comparedValues
+     *
+     * @return Collection|CompareValue[]
+     */
+    public function getComparedValues(): Collection
+    {
+        return $this->comparedValues;
+    }
+
+    /**
+     * Get $relAnswerCode
+     *
+     * @return string
+     */
+    public function getRelAnswerCode(): string
+    {
+        return $this->relAnswerCode;
+    }
+
+    /**
+     * Set $relAnswerCode
+     *
+     * @param string
+     */
+    public function setRelAnswerCode(string $relAnswerCode)
+    {
+        $this->relAnswerCode = $relAnswerCode;
     }
 
     /**

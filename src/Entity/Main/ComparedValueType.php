@@ -29,13 +29,20 @@ class ComparedValueType
     private $validations;
 
     /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Main\ComparedValue", mappedBy="valueType")
+     */
+    private $comparedValues;
+
+    /**
      * Set $id
      * Set $validations
+     * Set $comparedValues
      */
     public function __construct()
     {
         $this->id = Uuid::uuid4();
         $this->validations = new ArrayCollection();
+        $this->comparedValues = new ArrayCollection();
     }
 
     /**
@@ -76,5 +83,15 @@ class ComparedValueType
     public function getValidations(): Collection
     {
         return $this->validations;
+    }
+
+    /**
+     * Get $comparedValues
+     *
+     * @return Collection|ComparedValue[]
+     */
+    public function getComparedValues(): Collection
+    {
+        return $this->comparedValues;
     }
 }

@@ -19,29 +19,6 @@ class InterviewRepository extends ServiceEntityRepository
 
     public function getInterviewsByQuestionnaireIdAndMonth($questionnaireId, $month): array
     {
-        // $query = $this->createQueryBuilder('interview')
-        //     ->innerJoin('interview.interviewId', 'interview_id')
-        //     ->innerJoin('interview_id.')
-        //     ->select('
-        //         COALESCE(
-        //             interview.answerIsString,
-        //             cast(interview.answerIsInt as varchar),
-        //             cast(interview.answerIsLong as varchar),
-        //             cast(interview.answerIsDouble as varchar),
-        //             cast(interview.answerIsDateTime as varchar),
-        //             cast(interview.answerIsList as varchar),
-        //             cast(interview.answerIsBool as varchar),
-        //             cast(interview.answerIsIntArray as varchar),
-        //             cast(interview.answerIsIntMatrix as varchar),
-        //             cast(interview.answerIsGps as varchar),
-        //             cast(interview.answerIsYesNo as varchar),
-        //             cast(interview.answerIsAudio as varchar),
-        //             cast(interview.answerIsArea as varchar),
-        //             :no_answer
-        //         ) as answer
-        //     ');
-        // $query->innerJoin('interview.interviewId', 'interview_id');
-
         $conn = $this->getEntityManager('server')->getConnection();
 
         $query = '
@@ -96,8 +73,6 @@ class InterviewRepository extends ServiceEntityRepository
 
         $rows = $stmt->fetchAll();
 
-        // $subArrayIndex = array_search($row['interview_id'], array_column($interviews, 'interview_id'));
-        // $interviews[$subArrayIndex];
         $interviews = [];
         foreach ($rows as $row) {
             $filterResults = array_filter($interviews, function ($_interview) use ($row) {
