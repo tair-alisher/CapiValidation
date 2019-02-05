@@ -7,7 +7,10 @@ use Ramsey\Uuid\Uuid;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
-/** @ORM\Table(name="public.value_type") */
+/**
+ * @ORM\Table(name="public.value_type")
+ * @ORM\Entity
+ */
 class ValueType
 {
     /**

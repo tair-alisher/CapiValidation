@@ -9,6 +9,7 @@ use Ramsey\Uuid\Uuid;
 
 /**
  * @ORM\Table(name="public.input_value_type")
+ * @ORM\Entity
  */
 class InputValueType
 {
@@ -20,6 +21,7 @@ class InputValueType
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Main\ValueType", inversedBy="InputValueTypes")
+     * @ORM\JoinColumn(name="value_type_id")
      */
     private $valueType;
 

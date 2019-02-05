@@ -7,7 +7,67 @@
 <hr>
 <div class="wrapper">
   {{ form_start(form) }}
-    {{ form_widget(form) }}
+    <div class="my-custom-class-for-errors">
+      {{ form_errors(form) }}
+    </div>
+
+    <div class="row">
+      <div class="col-md-12 col-sm-12">
+        {{ form_row(form.title) }}
+      </div>
+    </div>
+
+    <hr>
+    <i><b>Проверяемый ответ</b></i>
+    <div class="row">
+      <div class="col-md-4">
+        {{ form_row(form.answerCode) }}
+      </div>
+      <div class="col-md-4">
+        {{ form_row(form.answerType) }}
+      </div>
+      <div class="col-md-4">
+        {{ form_row(form.answerIndicator) }}
+      </div>
+    </div>
+
+    <hr>
+    <i><b>Сравниваемые значения</b></i>
+    <div class="row">
+      <div class="col-md-4">
+        {{ form_row(form.compareOperator) }}
+      </div>
+      <div class="col-md-4">
+        {{ form_row(form.comparedValues) }}
+      </div>
+      <div class="col-md-4">
+        {{ form_row(form.comparedValueTypes) }}
+      </div>
+    </div>
+
+    <hr>
+    <i><b>Зависит от ответа</b></i>
+    <div class="row">
+      <div class="col-md-3">
+        {{ form_row(form.relAnswerCode) }}
+      </div>
+      <div class="col-md-3">
+        {{ form_row(form.relAnswerCompareOperator) }}
+      </div>
+      <div class="col-md-3">
+        {{ form_row(form.relAnswerValue) }}
+      </div>
+      <div class="col-md-3">
+        {{ form_row(form.relAnswerType) }}
+      </div>
+    </div>
+
+    <hr>
+    <div class="row">
+      <div class="col-md-12 col-sm-12">
+        {{ form_row(form.questionnaireId) }}
+      </div>
+    </div>
   {{ form_end(form) }}
 </div>
 {% endblock %}

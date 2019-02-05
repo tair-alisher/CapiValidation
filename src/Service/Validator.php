@@ -6,7 +6,6 @@ use App\Entity\Main\CheckError;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\Remote\QuestionnaireRepository;
 use App\Repository\Main\ValidationRepository;
-use App\Repository\Main\RestraintRepository;
 use App\Repository\Main\CheckErrorRepository;
 
 class Validator
@@ -14,7 +13,6 @@ class Validator
     private $em;
     private $qusetionnaireRepo;
     private $validationRepo;
-    private $restraintRepo;
     private $errorRepo;
 
     /**
@@ -23,20 +21,17 @@ class Validator
      * @param Doctrine\ORM\EntityManagerInterface $em
      * @param App\Repository\Remote\QuestionnaireRepository $questionnaireRepo
      * @param App\Repository\Main\ValidationRepository $validationRepo
-     * @param App\Repository\Main\RestraintRepositroy $restraintRepo
      * @param App\Repository\Main\CheckErrorRepository $errorRepo
      */
     public function __construct(
         EntityManagerInterface $em,
         QuestionnaireRepository $qusetionnaireRepo,
         ValidationRepository $validationRepo,
-        RestraintRepository $restraintRepo,
         CheckErrorRepository $errorRepo)
     {
         $this->em = $em;
         $this->questionnaireRepo = $qusetionnaireRepo;
         $this->validationRepo = $validationRepo;
-        $this->restraintRepo = $restraintRepo;
         $this->errorRepo = $errorRepo;
     }
 

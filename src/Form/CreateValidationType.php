@@ -2,7 +2,6 @@
 
 namespace App\Form;
 
-use App\Repository\Main\RestraintRepository;
 use App\Entity\Main\Validation;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -17,54 +16,73 @@ class CreateValidationType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        /** var \App\Repository\Main\RestraintRepository $restraintRepository */
-        $restraintRepository = $options['restraint_repository'];
-        $restraints = $restraintRepository->findAll();
-        $restraintTitleIdArr = [];
-
-        foreach ($restraints as $restraint) {
-            $restraintTitleIdArr[$restraint->getTitle()] = $restraint->getId();
-        }
+        /** var \App\Service\Getter $validator */
+        $getter = $options['getter'];
+        $inputValueTypes = $getter->getInputValueTypes();
+        $compareOperators = $getter->getCompareOperators();
+        $comparedValueTypes = $getter->getComparedValueTypes();
 
         $questionnaireRepository = $options['questionnaire_repository'];
-        $questionnaires = $questionnaireRepository->findAll();
-        $questionnaireTitleIdArr = [];
+        $items = $questionnaireRepository->findAll();
+        $questionnaires = [];
 
-        foreach ($questionnaires as $questionnaire) {
-            $questionnaireTitleIdArr[$questionnaire->getTitle()] = $questionnaire->getId();
+        foreach ($items as $item) {
+            $questionnaires[$item->getTitle()] = $item->getId();
         }
 
         $builder
             ->add('title', TextType::class, [
                 'required' => true,
-                'label' => 'Название првоерки',
-                'attr' => ['placeholder' => 'пример: hhCode: содержит значение из диапазона значений']
+                'label' => 'Наименоваине контроля',
+                'attr' => ['placeholder' => 'пример: hhCode: для на значения равна шести символам']
             ])
-            ->add('questionId', TextType::class, [
+
+            ->add('answerCode', TextType::class, [
                 'required' => true,
-                'label' => 'Идентификатор вопроса',
+                'label' => 'Проверяемое значение',
                 'attr' => ['placeholder' => 'пример: hhCode']
             ])
-            ->add('restraintId', ChoiceType::class, [
-                'choices' => $restraintTitleIdArr,
-                'label' => 'Условие'
-            ])
-            ->add('condition', TextType::class, [
+            ->add('answerType', TextType::class, [
                 'label' => 'Значение условия',
                 'attr' => ['placeholder' => 'пример: 10|null|10,20,30']
             ])
-            ->add('relatedQuestionId', TextType::class, [
-                'required' => false,
-                'label' => 'Код связного вопроса (если зависит от другого вопроса)',
-                'attr' => ['placeholder' => 'пример: f3r1q1']
+            ->add('answerIndicator', ChoiceType::class, [
+                'choices' => $inputValueTypes,
+                'label' => 'Тип значения'
             ])
-            ->add('relatedQuestionCondition', TextType::class, [
-                'required' => false,
-                'label' => 'Значение связного вопроса (если зависит от другого вопроса)',
-                'attr' => ['placeholder' => 'пример: 1']
+
+            ->add('compareOperator', ChoiceType::class, [
+                'choices' => $compareOperators,
+                'label' => 'Оператор сравнения',
             ])
+            ->add('comparedValues', TextType::class, [
+                'label' => 'Сравниваемое значение',
+                'attr' => ['placeholder' => 'пример: 10']
+            ])
+            ->add('comparedValueTypes', ChoiceType::class, [
+                'choices' => $comparedValueTypes,
+                'label' => 'Тип'
+            ])
+
+            ->add('relAnswerCode', TextType::class, [
+                'label' => 'Зависит от ответа (код)',
+                'attr' => ['placeholder' => 'пример: resultB']
+            ])
+            ->add('relAnswerCompareOperator', ChoiceType::class, [
+                'choices' => $compareOperators,
+                'label' => 'Оператор сравнения'
+            ])
+            ->add('relAnswerValue', TextType::class, [
+                'label' => 'Значение',
+                'attr' => ['placeholder' => 'пример: 10']
+            ])
+            ->add('relAnswerType', ChoiceType::class, [
+                'choices' => $comparedValueTypes,
+                'label' => 'Тип'
+            ])
+
             ->add('questionnaireId', ChoiceType::class, [
-                'choices' => $questionnaireTitleIdArr,
+                'choices' => $questionnaires,
                 'label' => 'Опросник'
             ])
             ->add('create', SubmitType::class, [
@@ -79,6 +97,6 @@ class CreateValidationType extends AbstractType
             ->setDefaults([
                 'data_class' => Validation::class,
             ])
-            ->setRequired(['restraint_repository', 'questionnaire_repository']);
+            ->setRequired(['getter', 'questionnaire_repository']);
     }
 }

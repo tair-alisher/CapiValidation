@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\Collection;
 
 /**
  * @ORM\Table(name="public.operator_value")
+ * @ORM\Entity
  */
 class OperatorValue
 {

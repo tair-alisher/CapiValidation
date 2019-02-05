@@ -9,6 +9,7 @@ use Ramsey\Uuid\Uuid;
 
 /**
  * @ORM\Table(name="public.compared_value_type")
+ * @ORM\Entity
  */
 class ComparedValueType
 {
@@ -20,6 +21,7 @@ class ComparedValueType
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Main\ValueType", inversedBy="comparedValueTypes")
+     * @ORM\JoinColumn(name="value_type_id")
      */
     private $valueType;
 
@@ -72,7 +74,7 @@ class ComparedValueType
      */
     public function getValueType(): ?ValueType
     {
-        $this->valueType;
+        return $this->valueType;
     }
 
     /**

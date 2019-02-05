@@ -9,6 +9,7 @@ use Ramsey\Uuid\Uuid;
 
 /**
  * @ORM\Table(name="public.compare_operator")
+ * @ORm\Entity
  */
 class CompareOperator
 {
@@ -20,6 +21,7 @@ class CompareOperator
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Main\OperatorValue", inversedBy="compareOperators")
+     * @ORM\JoinColumn(name="operator_value_id")
      */
     private $operatorValue;
 

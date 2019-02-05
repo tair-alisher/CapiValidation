@@ -3,7 +3,7 @@
 namespace App\Entity\Main;
 
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\ArrayCollections;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Ramsey\Uuid\Uuid;
 
@@ -31,11 +31,13 @@ class Validation
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Main\InputValueType", inversedBy="validations")
+     * @ORM\JoinColumn(name="answer_type_id")
      */
     private $answerType;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Main\AnswerIndicator", inversedBy="validations")
+     * @ORM\JoinColumn(name="answer_indicator_id")
      */
     private $answerIndicator;
 
@@ -50,14 +52,26 @@ class Validation
     private $relAnswerCode;
 
     /**
+     * @ORM\Column(type="string", name="rel_answer_value")
+     */
+    private $relAnswerValue;
+
+    /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Main\ComparedValueType", inversedBy="validations")
+     * @ORM\JoinColumn(name="rel_answer_type_id")
      */
     private $relAnswerType;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Main\CompareOperator", inversedBy="validations")
+     * @ORM\JoinColumn(name="rel_answer_compare_operator_id")
      */
     private $relAnswerCompareOperator;
+
+    /**
+     * @ORM\Column(type="string", name="questionnaire_id")
+     */
+    private $questionnaireId;
 
     /**
      * Set $id
@@ -77,6 +91,46 @@ class Validation
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Get $title
+     *
+     * @return string
+     */
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
+
+    /**
+     * Set $title
+     *
+     * @param string
+     */
+    public function setTitle(string $title)
+    {
+        $this->title = $title;
+    }
+
+    /**
+     * Get $answerCode
+     *
+     * @return string
+     */
+    public function getAnswerCode(): ?string
+    {
+        return $this->answerCode;
+    }
+
+    /**
+     * Set $answerCode
+     *
+     * @param string
+     */
+    public function setAnswerCode(string $answerCode)
+    {
+        $this->answerCode = $answerCode;
     }
 
     /**
@@ -134,7 +188,7 @@ class Validation
      *
      * @return string
      */
-    public function getRelAnswerCode(): string
+    public function getRelAnswerCode(): ?string
     {
         return $this->relAnswerCode;
     }
@@ -170,6 +224,26 @@ class Validation
     }
 
     /**
+     * Get $relAnswerValue
+     *
+     * @return string
+     */
+    public function getRelAnswerValue(): ?string
+    {
+        return $this->relAnswerValue;
+    }
+
+    /**
+     * Set $relAnswerValue
+     *
+     * @param string
+     */
+    public function setRelAnswerValue(string $relAnswerValue)
+    {
+        $this->relAsnwerValue = $relAnswerValue;
+    }
+
+    /**
      * Get $relAnswerCompareOperator
      *
      * @return App\Entity\Main\CompareOperator
@@ -187,5 +261,25 @@ class Validation
     public function setRelAnswerCompareOperator(?CompareOperator $compareOperator)
     {
         $this->relAnswerCompareOperator = $compareOperator;
+    }
+
+    /**
+     * Get $questionnaireId
+     *
+     * @return string
+     */
+    public function getQuestionnaireId(): ?string
+    {
+        return $this->questionnaireId;
+    }
+
+    /**
+     * Set $questionnaireId
+     *
+     * @param string
+     */
+    public function setQuestionnaireId(string $questionnaireId)
+    {
+        $this->questionnaireId = $questionnaireId;
     }
 }

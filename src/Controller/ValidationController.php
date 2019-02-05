@@ -4,14 +4,15 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Repository\Main\ValidationRepository;
-use App\Repository\Main\RestraintRepository;
 use App\Repository\Remote\QuestionnaireRepository;
+use App\Repository\Main\InputValueTypeRepository;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use App\Form\ValidateType;
 use App\Form\CreateValidationType;
 use App\Entity\Main\Validation;
 use App\Service\Validator;
+use App\Service\Getter;
 
 use App\Repository\Remote\InterviewRepository;
 
@@ -39,12 +40,12 @@ class ValidationController extends AbstractController
     public function create(
         Request $request,
         QuestionnaireRepository $questionnaireRepo,
-        RestraintRepository $restraintRepo,
+        Getter $getter,
         Validator $validator)
     {
         $validation = new Validation();
-        $form = $this->createForm(CreateValidationType::class, $validation, [
-            'restraint_repository' => $restraintRepo,
+        $form = $this->createForm(CreateValidationType::class, null, [
+            'getter' => $getter,
             'questionnaire_repository' => $questionnaireRepo
         ]);
 
@@ -61,14 +62,15 @@ class ValidationController extends AbstractController
     }
 
     /**
-     * @Route("/validation/test/{questionnaireId}", name="validation.test")
+     * @Route("/validation/test", name="validation.test")
      */
-    public function test(InterviewRepository $interviewRepo, $questionnaireId)
+    public function test(Getter $getter)
     {
-        $interviews = $interviewRepo->getInterviewsByQuestionnaireIdAndMonth($questionnaireId, 11);
+        $types = $getter->getInputValueTypes();
+
 
         return $this->render('validation/test.html.twig', [
-            'interviews' => $interviews
+            'types' => $types
         ]);
     }
 
