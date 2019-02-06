@@ -8,7 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Ramsey\Uuid\Uuid;
 
 /**
- * @ORM\Table(name="public.logic_opeartor")
+ * @ORM\Table(name="public.logic_operator")
  * @ORM\Entity
  */
 class LogicOperator
@@ -20,7 +20,7 @@ class LogicOperator
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Main\OperatorValue", inversedBy="LogicOperators")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Main\OperatorValue", inversedBy="logicOperators")
      * @ORM\JoinColumn(name="operator_value_id")
      */
     private $operatorValue;

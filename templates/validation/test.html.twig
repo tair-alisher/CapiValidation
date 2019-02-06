@@ -6,7 +6,7 @@
 <div class="wrapper">
   <h4>Опросники</h4>
   <hr>
-  {% for type in types %}
-    <p>{{ type }}</p>
+  {% for operator in compare_operators|keys %}
+    <p>{{ compare_operators[operator] }} - {{ operator }}</p>
   {% endfor %}
 {% endblock %}

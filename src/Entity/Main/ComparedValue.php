@@ -101,7 +101,7 @@ class ComparedValue
      *
      * @param App\Entity\Main\ComparedValueType
      */
-    public function setValueType(?CompareValueType $valueType)
+    public function setValueType(?ComparedValueType $valueType)
     {
         $this->valueType = $valueType;
     }

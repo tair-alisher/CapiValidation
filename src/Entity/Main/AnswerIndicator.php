@@ -9,6 +9,7 @@ use Ramsey\Uuid\Uuid;
 
 /**
  * @ORM\Table(name="public.answer_indicator")
+ * @ORM\Entity
  */
 class AnswerIndicator
 {
@@ -24,7 +25,7 @@ class AnswerIndicator
     private $title;
 
     /**
-     * @ORM\Column(type="name")
+     * @ORM\Column(type="string")
      */
     private $name;
 
@@ -41,6 +42,16 @@ class AnswerIndicator
     {
         $this->id = Uuid::uuid4();
         $this->validations = new ArrayCollection();
+    }
+
+    /**
+     * Get $id
+     *
+     * @return guid
+     */
+    public function getId()
+    {
+        return $this->id;
     }
 
     /**
@@ -68,7 +79,7 @@ class AnswerIndicator
      *
      * @param string
      */
-    public function setName($name)
+    public function setName(string $name)
     {
         return $this->name = $name;
     }
@@ -78,7 +89,7 @@ class AnswerIndicator
      *
      * @return string
      */
-    public function getName()
+    public function getName(): ?string
     {
         return $this->name;
     }

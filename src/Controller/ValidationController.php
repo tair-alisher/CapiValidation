@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Repository\Main\ValidationRepository;
-use App\Repository\Remote\QuestionnaireRepository;
+use App\Repository\Remote\QuestionnaireRepository as QuestRepo;
 use App\Repository\Main\InputValueTypeRepository;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
@@ -35,16 +35,17 @@ class ValidationController extends AbstractController
     }
 
     /**
-     * @Route("/validation/create", name="validation.create", methods={"GET", "POST"})
+     * @Route("/validation/create", name="validation.create_form", methods="GET")
      */
-    public function create(
+    public function create_form(
         Request $request,
-        QuestionnaireRepository $questionnaireRepo,
+        QuestRepo $questionnaireRepo,
         Getter $getter,
         Validator $validator)
     {
         $validation = new Validation();
         $form = $this->createForm(CreateValidationType::class, null, [
+            'action' => $this->generateUrl('validation.create'),
             'getter' => $getter,
             'questionnaire_repository' => $questionnaireRepo
         ]);
@@ -62,22 +63,46 @@ class ValidationController extends AbstractController
     }
 
     /**
+     * @Route("/validation/create", name="validation.create", methods="POST")
+     */
+    public function create(Request $request, QuestRepo $questRepo, Validator $validator)
+    {
+        var_dump($request);
+    }
+
+    /**
+     * @Route("/validation/add-compared-value", name="validation.add_compared_value", methods="POST")
+     */
+    public function addComparedValue(Getter $getter)
+    {
+        $logicOperators = $getter->getLogicOperators();
+        $comparedValueTypes = $getter->getComparedValueTypes();
+
+        return $this->render('validation/compared_value.html.twig', [
+            'logic_operators' => $logicOperators,
+            'compared_value_types' => $comparedValueTypes
+        ]);
+    }
+
+    /**
      * @Route("/validation/test", name="validation.test")
      */
     public function test(Getter $getter)
     {
-        $types = $getter->getInputValueTypes();
+        $compareOperators = $getter->getCompareOperators();
+        $comparedValueTypes = $getter->getComparedValueTypes();
 
 
         return $this->render('validation/test.html.twig', [
-            'types' => $types
+            'compare_operators' => $compareOperators,
+            'compared_value_types' => $comparedValueTypes
         ]);
     }
 
     /**
      * @Route("/validate", name="validate", methods={"GET", "POST"})
      */
-    public function validate(Request $request, QuestionnaireRepository $questionnaireRepo, Validator $validator)
+    public function validate(Request $request, QuestRepo $questionnaireRepo, Validator $validator)
     {
         $form = $this->createForm(ValidateType::class, null, [
             'questionnaire_repository' => $questionnaireRepo

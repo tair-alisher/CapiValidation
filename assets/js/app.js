@@ -12,4 +12,3 @@ require('../css/style.scss');
 const $ = require('jquery');
 
 require('bootstrap');
-

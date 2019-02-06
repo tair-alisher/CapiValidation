@@ -21,9 +21,10 @@ class CreateValidationType extends AbstractType
         $inputValueTypes = $getter->getInputValueTypes();
         $compareOperators = $getter->getCompareOperators();
         $comparedValueTypes = $getter->getComparedValueTypes();
+        $answerIndicators = $getter->getAnswerIndicators();
 
         $questionnaireRepository = $options['questionnaire_repository'];
-        $items = $questionnaireRepository->findAll();
+        $items = $questionnaireRepository->getAllOrderedByTitle();
         $questionnaires = [];
 
         foreach ($items as $item) {
@@ -33,39 +34,45 @@ class CreateValidationType extends AbstractType
         $builder
             ->add('title', TextType::class, [
                 'required' => true,
-                'label' => 'Наименоваине контроля',
-                'attr' => ['placeholder' => 'пример: hhCode: для на значения равна шести символам']
+                'label' => 'Наименование контроля*',
+                'attr' => ['placeholder' => 'пример: hhCode: длина значения равна шести символам']
             ])
-
+            // проверяемый ответ
             ->add('answerCode', TextType::class, [
                 'required' => true,
-                'label' => 'Проверяемое значение',
+                'label' => 'Код ответа',
                 'attr' => ['placeholder' => 'пример: hhCode']
             ])
-            ->add('answerType', TextType::class, [
-                'label' => 'Значение условия',
-                'attr' => ['placeholder' => 'пример: 10|null|10,20,30']
+            ->add('answerType', ChoiceType::class, [
+                'choices' => $inputValueTypes,
+                'label' => 'Тип'
             ])
             ->add('answerIndicator', ChoiceType::class, [
-                'choices' => $inputValueTypes,
-                'label' => 'Тип значения'
+                'choices' => $answerIndicators,
+                'label' => 'Атрибут'
             ])
-
+            // сравниваемые значения
             ->add('compareOperator', ChoiceType::class, [
                 'choices' => $compareOperators,
                 'label' => 'Оператор сравнения',
+                'attr' => ['class' => 'compared-value-operator-id']
             ])
             ->add('comparedValues', TextType::class, [
-                'label' => 'Сравниваемое значение',
-                'attr' => ['placeholder' => 'пример: 10']
+                'label' => 'Значение',
+                'attr' => [
+                    'placeholder' => 'пример: 10',
+                    'class' => 'compared-value-input'
+                ]
             ])
             ->add('comparedValueTypes', ChoiceType::class, [
                 'choices' => $comparedValueTypes,
-                'label' => 'Тип'
+                'label' => 'Тип',
+                'attr' => ['class' => 'compared-value-type-id']
             ])
-
+            // связынй ответ
             ->add('relAnswerCode', TextType::class, [
-                'label' => 'Зависит от ответа (код)',
+                'label' => 'Код ответа',
+                'required' => false,
                 'attr' => ['placeholder' => 'пример: resultB']
             ])
             ->add('relAnswerCompareOperator', ChoiceType::class, [
@@ -74,29 +81,26 @@ class CreateValidationType extends AbstractType
             ])
             ->add('relAnswerValue', TextType::class, [
                 'label' => 'Значение',
+                'required' => false,
                 'attr' => ['placeholder' => 'пример: 10']
             ])
             ->add('relAnswerType', ChoiceType::class, [
                 'choices' => $comparedValueTypes,
                 'label' => 'Тип'
             ])
-
+            // опросник
             ->add('questionnaireId', ChoiceType::class, [
                 'choices' => $questionnaires,
-                'label' => 'Опросник'
+                'label' => 'Опросник*'
             ])
             ->add('create', SubmitType::class, [
-                'label' => 'Добавить',
-                'attr' => ['class' => 'btn-primary pull-right']
+                'label' => 'Сохранить',
+                'attr' => ['class' => 'btn-success pull-right']
             ]);
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver
-            ->setDefaults([
-                'data_class' => Validation::class,
-            ])
-            ->setRequired(['getter', 'questionnaire_repository']);
+        $resolver->setRequired(['getter', 'questionnaire_repository']);
     }
 }
