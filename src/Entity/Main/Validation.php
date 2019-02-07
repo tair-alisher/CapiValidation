@@ -69,18 +69,20 @@ class Validation
     private $relAnswerCompareOperator;
 
     /**
-     * @ORM\Column(type="string", name="questionnaire_id")
+     * @ORM\OneToMany(targetEntity="App\Entity\Main\QuestionnaireValidation", mappedBy="validation")
      */
-    private $questionnaireId;
+    private $questionnaireValidations;
 
     /**
      * Set $id
      * Set $comparedValues
+     * Set $questionnaireValidations
      */
     public function __construct()
     {
         $this->id = Uuid::uuid4();
         $this->comparedValues = new ArrayCollection();
+        $this->questionnaireValidations = new ArrayCollection();
     }
 
     /**
@@ -264,22 +266,12 @@ class Validation
     }
 
     /**
-     * Get $questionnaireId
+     * Get $questionnaireValidations
      *
-     * @return string
+     * @return Collection|QuestionnaireValidation[]
      */
-    public function getQuestionnaireId(): ?string
+    public function getQuestionnaireValidation()
     {
-        return $this->questionnaireId;
-    }
-
-    /**
-     * Set $questionnaireId
-     *
-     * @param string
-     */
-    public function setQuestionnaireId(string $questionnaireId)
-    {
-        $this->questionnaireId = $questionnaireId;
+        return $this->questionnaireValidations;
     }
 }

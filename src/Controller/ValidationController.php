@@ -67,7 +67,43 @@ class ValidationController extends AbstractController
      */
     public function create(Request $request, QuestRepo $questRepo, Validator $validator)
     {
-        var_dump($request);
+        $content = $request->getContent();
+        $_validation = json_decode($content);
+
+        $title = $_validation->title;
+        $answerCode = $_validation->answer->code;
+        $answerTypeId = $_validation->answer->typeId;
+        $answerIndicator = $_validation->answer->indicatorId;
+
+        $comparedOperator = $_validation->comparedValues->compareOperatorId;
+        $comparedValues = array();
+        foreach ($_validation->comparedValues->values as $comparedValue) {
+            array_push($comparedValues, array(
+                'logicOperator' => $comparedValue->logicOperator,
+                'value' => $comparedValue->value,
+                'typeId' => $comparedValue->typeId
+            ));
+        }
+
+        $relatedAnswer = array(
+            'code' => null,
+            'compareOperatorId' => null,
+            'value' => null,
+            'typeId' => null
+        );
+
+        if ($_validation->relatedAnswer != null) {
+            $relatedAnswer['code'] = $_validation->relatedAnswer->code;
+            $relatedAnswer['compareOperatorId'] = $_validation->relatedAnswer->compareOperatorId;
+            $relatedAnswer['value'] = $_validation->relatedAnswer->value;
+            $relatedAnswer['typeId'] = $_validation->relatedAnswer->typeId;
+        }
+
+        $questionnaires = $_validation->questionnaires;
+
+        // var_dump($params);
+
+        return new \Symfony\Component\HttpFoundation\Response(var_dump($_validation->questionnaires[0]));
     }
 
     /**
@@ -81,6 +117,18 @@ class ValidationController extends AbstractController
         return $this->render('validation/compared_value.html.twig', [
             'logic_operators' => $logicOperators,
             'compared_value_types' => $comparedValueTypes
+        ]);
+    }
+
+    /**
+     * @Route("/validation/add-questionnaire", name="validation.add_questionnaire", methods="POST")
+     */
+    public function addQuestionnaire(QuestRepo $questRepo)
+    {
+        $questionnaires = $questRepo->getTitleIdArray();
+
+        return $this->render('validation/questionnaire.html.twig', [
+            'questionnaires' => $questionnaires
         ]);
     }
 

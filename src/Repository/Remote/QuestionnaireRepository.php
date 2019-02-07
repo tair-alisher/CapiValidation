@@ -43,4 +43,16 @@ class QuestionnaireRepository extends ServiceEntityRepository
 
         return $paginator;
     }
+
+    public function getTitleIdArray(): array
+    {
+        $items = $this->getAllOrderedByTitle();
+        $titleIdArray = array();
+
+        foreach ($items as $item) {
+            $titleIdArray[$item->getTitle()] = $item->getId();
+        }
+
+        return $titleIdArray;
+    }
 }

@@ -24,12 +24,7 @@ class CreateValidationType extends AbstractType
         $answerIndicators = $getter->getAnswerIndicators();
 
         $questionnaireRepository = $options['questionnaire_repository'];
-        $items = $questionnaireRepository->getAllOrderedByTitle();
-        $questionnaires = [];
-
-        foreach ($items as $item) {
-            $questionnaires[$item->getTitle()] = $item->getId();
-        }
+        $questionnaires = $questionnaireRepository->getTitleIdArray();
 
         $builder
             ->add('title', TextType::class, [
@@ -54,20 +49,15 @@ class CreateValidationType extends AbstractType
             // сравниваемые значения
             ->add('compareOperator', ChoiceType::class, [
                 'choices' => $compareOperators,
-                'label' => 'Оператор сравнения',
-                'attr' => ['class' => 'compared-value-operator-id']
+                'label' => 'Оператор сравнения'
             ])
-            ->add('comparedValues', TextType::class, [
+            ->add('comparedValue', TextType::class, [
                 'label' => 'Значение',
-                'attr' => [
-                    'placeholder' => 'пример: 10',
-                    'class' => 'compared-value-input'
-                ]
+                'attr' => ['placeholder' => 'пример: 10']
             ])
-            ->add('comparedValueTypes', ChoiceType::class, [
+            ->add('comparedValueType', ChoiceType::class, [
                 'choices' => $comparedValueTypes,
-                'label' => 'Тип',
-                'attr' => ['class' => 'compared-value-type-id']
+                'label' => 'Тип'
             ])
             // связынй ответ
             ->add('relAnswerCode', TextType::class, [
@@ -91,12 +81,17 @@ class CreateValidationType extends AbstractType
             // опросник
             ->add('questionnaireId', ChoiceType::class, [
                 'choices' => $questionnaires,
-                'label' => 'Опросник*'
-            ])
-            ->add('create', SubmitType::class, [
-                'label' => 'Сохранить',
-                'attr' => ['class' => 'btn-success pull-right']
+                'label' => 'Опросник*',
+                'attr' => ['class' => 'questionnaire-id']
             ]);
+            // ->add('create', SubmitType::class, [
+            //     'label' => 'Сохранить',
+            //     'attr' => [
+            //         'class' => 'btn-success pull-right',
+            //         'onclick' => 'saveValidation()',
+            //         'id' => 'save-validation-btn'
+            //     ]
+            // ]);
     }
 
     public function configureOptions(OptionsResolver $resolver)
