@@ -30,10 +30,20 @@ class Validation
     private $answerCode;
 
     /**
+     * @ORM\Column(type="guid", name="answer_type_id")
+     */
+    private $answerTypeId;
+
+    /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Main\InputValueType", inversedBy="validations")
      * @ORM\JoinColumn(name="answer_type_id")
      */
     private $answerType;
+
+    /**
+     * @ORM\Column(type="guid", name="answer_indicator_id")
+     */
+    private $answerIndicatorId;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Main\AnswerIndicator", inversedBy="validations")
@@ -57,10 +67,20 @@ class Validation
     private $relAnswerValue;
 
     /**
+     * @ORM\Column(type="guid", name="rel_answer_type_id")
+     */
+    private $relAnswerTypeId;
+
+    /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Main\ComparedValueType", inversedBy="validations")
      * @ORM\JoinColumn(name="rel_answer_type_id")
      */
     private $relAnswerType;
+
+    /**
+     * @ORM\Column(type="guid", name="rel_answer_compare_operator_id")
+     */
+    private $relAnswerCompareOperatorId;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Main\CompareOperator", inversedBy="validations")
@@ -136,6 +156,26 @@ class Validation
     }
 
     /**
+     * Get $answerTypeId
+     *
+     * @return guid
+     */
+    public function getAnswerTypeId()
+    {
+        return $this->answerTypeId;
+    }
+
+    /**
+     * Set $answerTypeId
+     *
+     * @param guid
+     */
+    public function setAnswerTypeId($typeId)
+    {
+        $this->answerTypeId = $typeId;
+    }
+
+    /**
      * Get $answerType
      *
      * @return App\Entity\Main\InputValueType
@@ -153,6 +193,26 @@ class Validation
     public function setAnswerType(?InputValueType $type)
     {
         $this->answerType = $type;
+    }
+
+    /**
+     * Get $answerIndicatorId
+     *
+     * @return guid
+     */
+    public function getAnswerIndicatorId()
+    {
+        return $this->answerIndicatorId;
+    }
+
+    /**
+     * Set $answerIndicatorId
+     *
+     * @param guid
+     */
+    public function setAnswerIndicatorId($indicatorId)
+    {
+        $this->answerIndicatorId = $indicatorId;
     }
 
     /**
@@ -206,6 +266,26 @@ class Validation
     }
 
     /**
+     * Get $relAnswerTypeId
+     *
+     * @return guid
+     */
+    public function getRelAnswerTypeId()
+    {
+        return $this->relAnswerTypeId;
+    }
+
+    /**
+     * Set $relAnswerTypeId
+     *
+     * @param guid
+     */
+    public function setRelAnswerTypeId($typeId)
+    {
+        $this->relAnswerTypeId = $typeId;
+    }
+
+    /**
      * Get $relAnswerType
      *
      * @return App\Entity\Main\ComparedValueType
@@ -246,6 +326,26 @@ class Validation
     }
 
     /**
+     * Get $relAnswerCompareOperatorId
+     *
+     * @return guid
+     */
+    public function getRelAnswerCompareOperatorId()
+    {
+        return $this->relAnswerCompareOperatorId;
+    }
+
+    /**
+     * Set $relAnswerCompareOperatorId
+     *
+     * @param guid
+     */
+    public function setRelAnswerCompareOperatorId($operatorId)
+    {
+        $this->relAnswerCompareOperatorId = $operatorId;
+    }
+
+    /**
      * Get $relAnswerCompareOperator
      *
      * @return App\Entity\Main\CompareOperator
@@ -270,7 +370,7 @@ class Validation
      *
      * @return Collection|QuestionnaireValidation[]
      */
-    public function getQuestionnaireValidation()
+    public function getQuestionnaireValidation(): Collection
     {
         return $this->questionnaireValidations;
     }

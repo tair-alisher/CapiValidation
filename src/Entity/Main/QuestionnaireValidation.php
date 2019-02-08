@@ -18,15 +18,26 @@ class QuestionnaireValidation
     private $id;
 
     /**
+     * @ORM\Column(type="string", name="questionnaire_id")
+     */
+    private $questionnaireId;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Remote\Questionnaire", inversedBy="questionnaireValidations")
+     * @ORM\JoinColumn(name="questionnaire_id")
+     */
+    private $questionnaire;
+
+    /**
+     * @ORM\Column(type="guid", name="validation_id")
+     */
+    private $validationId;
+
+    /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Main\Validation", inversedBy="questionnaireValidations")
      * @ORM\JoinColumn(name="validation_id")
      */
     private $validation;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Remote\Questionnaire", inversedBy="questionnaireValidations")
-     */
-    private $questionnaire;
 
     /**
      * Set $id
@@ -47,23 +58,23 @@ class QuestionnaireValidation
     }
 
     /**
-     * Get $validation
+     * Get $questionnaireId
      *
-     * @return App\Entity\Main\Validation
+     * @return string
      */
-    public function getValidation(): ?\App\Entity\Main\Validation
+    public function getQuestionnaireId()
     {
-        return $this->validation;
+        return $this->questionnaireId;
     }
 
     /**
-     * Set $validation
+     * Set $questionnaireId
      *
-     * @param App\Entity\Main\Validation
+     * @param string
      */
-    public function setValidation(?\App\Entity\Main\Validation $validation)
+    public function setQuestionnaireId($questionnaireId)
     {
-        $this->validation = $validation;
+        $this->questionnaireId = $questionnaireId;
     }
 
     /**
@@ -84,5 +95,45 @@ class QuestionnaireValidation
     public function setQuestionnaire(?\App\Entity\Remote\Questionnaire $questionnaire)
     {
         $this->questionnaire = $questionnaire;
+    }
+
+    /**
+     * Get $validationId
+     *
+     * @return guid
+     */
+    public function getValidationId()
+    {
+        return $this->validationId;
+    }
+
+    /**
+     * Set $validationId
+     *
+     * @param guid
+     */
+    public function setValidationId($validationId)
+    {
+        $this->validationId = $validationId;
+    }
+
+    /**
+     * Get $validation
+     *
+     * @return App\Entity\Main\Validation
+     */
+    public function getValidation(): ?\App\Entity\Main\Validation
+    {
+        return $this->validation;
+    }
+
+    /**
+     * Set $validation
+     *
+     * @param App\Entity\Main\Validation
+     */
+    public function setValidation(?\App\Entity\Main\Validation $validation)
+    {
+        $this->validation = $validation;
     }
 }

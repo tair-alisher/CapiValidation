@@ -3,6 +3,9 @@
 namespace App\Service;
 
 use App\Entity\Main\CheckError;
+use App\Entity\Main\Validation;
+use App\Entity\Main\ComparedValue;
+use App\Entity\Main\QuestionnaireValidation;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\Remote\QuestionnaireRepository;
 use App\Repository\Main\ValidationRepository;
@@ -42,21 +45,80 @@ class Validator
      *
      * @return bool
      */
-    public function createValidation($validation)
+    public function createValidation($_validation)
     {
-        $validation->setQuestionnaireTitle(
-            $this->qusetionnaireRepo->find($validation->getQuestionnaireId())->getTitle()
-        );
+        $validationId = $this->_createValidation($_validation);
+        $this->_addValidationComparedValues($_validation->comparedValues, $validationId);
+        $this->_createQuestionnaireValidation($_validation->questionnaires, $validationId);
+    }
 
-        try {
-            $this->em->persist($validation);
-            $this->em->flush();
+    /**
+     * Creates validation and returns created validation id
+     *
+     * @param object $_validation
+     *
+     * @return guid $validationId
+     */
+    private function _createValidation($_validation)
+    {
+        $validation = new Validation();
+        $validation->setTitle($_validation->title);
+        $validation->setAnswerCode($_validation->answer->code);
+        $validation->setAnswerTypeId($_validation->answer->typeId);
+        $validation->setAnswerIndicatorId($_validation->answer->indicatorId);
 
-            return true;
+        if ($_validation->relatedAnswer != null) {
+            $validation->setRelAnswerCode($_validation->relatedAnswer->code);
+            $validation->setRelAnswerValue($_validation->relatedAnswer->value);
+            $validation->setRelAnswerTypeId($_validation->relatedAnswer->tyepId);
+            $validatino->setRelAnswerCompareOperatorId($_validation->relatedAnswer->compareOperatorId);
         }
-        catch (\Exception $e) {
-            return false;
+
+        $this->em->persist($validation);
+        $this->em->flush();
+
+        return $validation->getId();
+    }
+
+    /**
+     * Creates validation's compared values
+     *
+     * @param array $comparedValuse
+     * @param guid $validationId
+     */
+    private function _addValidationComparedValues(array $comparedValues, $validationId)
+    {
+        foreach ($comparedValues as $value) {
+            $comparedValue = new ComparedValue();
+            $comparedValue->setValidationId($validationId);
+            $comparedValue->setValueTypeId($value->typeId);
+            $comparedValue->setValue($value->value);
+            $comparedValue->setCompareOperatorId($comparedValues->compareOperatorId);
+            $comparedValue->setLogicOperatorId($value->logicOperatorId);
+
+            $this->em->perist($comparedValue);
         }
+
+        $this->em->flush();
+    }
+
+    /**
+     * Creates QuestionnaireValidation rows
+     *
+     * @param array $questionnaires
+     * @param guid $validationId
+     */
+    private function _createQuestionnaireValidation(array $questionnaires, $validationId)
+    {
+        foreach ($questionnaires as $questId) {
+            $questValidation = new QuestionnaireValidation();
+            $questValidation->setQuestionnaireId($questId);
+            $questValidation->setValidationId($validationId);
+
+            $this->em->persist($questValidation);
+        }
+
+        $this->em->flush();
     }
 
     /**

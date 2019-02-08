@@ -50,7 +50,7 @@ function saveValidation() {
       validation.comparedValues.values = [];
 
       validation.comparedValues.values.push({
-        logicOperator: null,
+        logicOperatorId: null,
         value: $('#create_validation_comparedValue').val(),
         typeId: $('#create_validation_comparedValueType').val()
       });
@@ -58,7 +58,7 @@ function saveValidation() {
       var _comparedValues = $('.compared-value');
       for (var i = 0; i < _comparedValues.length; i++) {
         validation.comparedValues.values.push({
-          logicOperator: _comparedValues[i].getElementsByClassName('compared-value-operator-id')[0].value,
+          logicOperatorId: _comparedValues[i].getElementsByClassName('compared-value-operator-id')[0].value,
           value: _comparedValues[i].getElementsByClassName('compared-value-input')[0].value,
           typeId: _comparedValues[i].getElementsByClassName('compared-value-type-id')[0].value
         });
@@ -91,8 +91,13 @@ function saveValidation() {
         dataType: 'text',
         data: JSON.stringify(validation),
 
-        success: function (respond) {
-          alert('Validation saved successfuly.');
+        success: function (response) {
+          if (response.success) {
+            alert('Валидация создана успешно.');
+          } else {
+            alert('Произошла ошибка. Попробуйте еще раз.');
+            console.log(response.message);
+          }
         },
         error: function (xhr) {
           alert('Ajax request failed.');

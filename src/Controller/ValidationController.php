@@ -2,17 +2,19 @@
 
 namespace App\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use App\Repository\Main\ValidationRepository;
-use App\Repository\Remote\QuestionnaireRepository as QuestRepo;
-use App\Repository\Main\InputValueTypeRepository;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Request;
-use App\Form\ValidateType;
-use App\Form\CreateValidationType;
-use App\Entity\Main\Validation;
-use App\Service\Validator;
 use App\Service\Getter;
+use App\Form\ValidateType;
+use App\Service\Validator;
+use App\Entity\Main\Validation;
+use App\Form\CreateValidationType;
+use App\Repository\Main\ValidationRepository;
+use App\Repository\Main\InputValueTypeRepository;
+use App\Repository\Remote\QuestionnaireRepository as QuestRepo;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+
 
 use App\Repository\Remote\InterviewRepository;
 
@@ -50,13 +52,6 @@ class ValidationController extends AbstractController
             'questionnaire_repository' => $questionnaireRepo
         ]);
 
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            if ($validator->createValidation($validation)) {
-                return $this->redirectToRoute('validation');
-            }
-        }
-
         return $this->render('validation/create.html.twig', [
             'form' => $form->createView()
         ]);
@@ -70,40 +65,20 @@ class ValidationController extends AbstractController
         $content = $request->getContent();
         $_validation = json_decode($content);
 
-        $title = $_validation->title;
-        $answerCode = $_validation->answer->code;
-        $answerTypeId = $_validation->answer->typeId;
-        $answerIndicator = $_validation->answer->indicatorId;
-
-        $comparedOperator = $_validation->comparedValues->compareOperatorId;
-        $comparedValues = array();
-        foreach ($_validation->comparedValues->values as $comparedValue) {
-            array_push($comparedValues, array(
-                'logicOperator' => $comparedValue->logicOperator,
-                'value' => $comparedValue->value,
-                'typeId' => $comparedValue->typeId
-            ));
-        }
-
-        $relatedAnswer = array(
-            'code' => null,
-            'compareOperatorId' => null,
-            'value' => null,
-            'typeId' => null
+        $response = array(
+            'success' => false,
+            'message' => ''
         );
 
-        if ($_validation->relatedAnswer != null) {
-            $relatedAnswer['code'] = $_validation->relatedAnswer->code;
-            $relatedAnswer['compareOperatorId'] = $_validation->relatedAnswer->compareOperatorId;
-            $relatedAnswer['value'] = $_validation->relatedAnswer->value;
-            $relatedAnswer['typeId'] = $_validation->relatedAnswer->typeId;
+        try {
+            $validator->createValidation($_validation);
+            $response['success'] = true;
+            $response['message'] = 'Validation created successfuly.';
+        } catch (\Exception $e) {
+            $response['message'] = $e->getMessage();
         }
 
-        $questionnaires = $_validation->questionnaires;
-
-        // var_dump($params);
-
-        return new \Symfony\Component\HttpFoundation\Response(var_dump($_validation->questionnaires[0]));
+        return new JsonResponse($response);
     }
 
     /**

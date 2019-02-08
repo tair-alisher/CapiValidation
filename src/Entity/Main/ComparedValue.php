@@ -20,10 +20,20 @@ class ComparedValue
     private $id;
 
     /**
+     * @ORM\Column(type="guid", name="validation_id")
+     */
+    private $validationId;
+
+    /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Main\Validation", inversedBy="comparedValues")
      * @ORM\JoinColumn(name="valdation_id")
      */
     private $validation;
+
+    /**
+     * @ORM\Column(type="guid", name="c_value_type_id")
+     */
+    private $valueTypeId;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Main\ComparedValueType", inversedBy="comparedValues")
@@ -37,10 +47,20 @@ class ComparedValue
     private $value;
 
     /**
+     * @ORM\Column(type="guid", name="c_operator_id")
+     */
+    private $compareOperatorId;
+
+    /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Main\CompareOperator", inversedBy="comparedValues")
      * @ORM\JoinColumn(name="c_operator_id")
      */
     private $compareOperator;
+
+    /**
+     * @ORM\Column(type="guid", name="logic_operator_id")
+     */
+    private $logicOperatorId;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Main\LogicOperator", inversedBy="comparedValues")
@@ -67,6 +87,16 @@ class ComparedValue
     }
 
     /**
+     * Get $validationId
+     *
+     * @return guid
+     */
+    public function getValidationId()
+    {
+        return $this->validationId;
+    }
+
+    /**
      * Get $validation
      *
      * @return App\Entity\Main\Validation
@@ -84,6 +114,26 @@ class ComparedValue
     public function setValidation(?Validation $validation)
     {
         $this->validation = $validation;
+    }
+
+    /**
+     * Get $valueTypeId
+     *
+     * @return guid
+     */
+    public function getValueTypeId()
+    {
+        return $this->valueTypeId;
+    }
+
+    /**
+     * Set $valueTypeId
+     *
+     * @param guid
+     */
+    public function setValueTypeId($valueTypeId)
+    {
+        $this->valueTypeId = $valueTypeId;
     }
 
     /**
@@ -107,6 +157,26 @@ class ComparedValue
     }
 
     /**
+     * Get $compareOperatorId
+     *
+     * @return guid
+     */
+    public function getCompareOperatorId()
+    {
+        return $this->compareOperatorId;
+    }
+
+    /**
+     * Set $compareOperatorId
+     *
+     * @param guid
+     */
+    public function setCompareOperatorId($operatorId)
+    {
+        $this->compareOperatorId = $operatorId;
+    }
+
+    /**
      * Get $compareOperator
      *
      * @return App\Entity\Main\CompareOperator
@@ -124,6 +194,26 @@ class ComparedValue
     public function setCompareOperator(?CompareOperator $operator)
     {
         $this->compareOperator = $operator;
+    }
+
+    /**
+     * Get $logicOperatorId
+     *
+     * @return guid
+     */
+    public function getLogicOperatorId()
+    {
+        return $this->logicOperatorId;
+    }
+
+    /**
+     * Set $logicOperatorId
+     *
+     * @param guid
+     */
+    public function setLogicOperatorId($operatorId)
+    {
+        $this->logicOperatorId = $operatorId;
     }
 
     /**
