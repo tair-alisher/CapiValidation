@@ -92,11 +92,12 @@ function saveValidation() {
         data: JSON.stringify(validation),
 
         success: function (response) {
-          if (response.success) {
+          var parsedResponse = JSON.parse(response);
+          if (parsedResponse.success) {
             alert('Валидация создана успешно.');
           } else {
             alert('Произошла ошибка. Попробуйте еще раз.');
-            console.log(response.message);
+            console.log(parsedResponse.message);
           }
         },
         error: function (xhr) {

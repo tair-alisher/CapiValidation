@@ -2,19 +2,19 @@
 
 namespace App\Repository\Main;
 
-use App\Entity\Main\CheckError;
+use App\Entity\Main\ValidationError;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
- * CheckErrorRepository
+ * ValidationErrorRepository
  */
-class CheckErrorRepository extends ServiceEntityRepository
+class ValidationErrorRepository extends ServiceEntityRepository
 {
     public function __construct(RegistryInterface $registry)
     {
-        parent::__construct($registry, CheckError::class);
+        parent::__construct($registry, ValidationError::class);
     }
 
     public function getAllByQuestionnaireId($questionnaireId): array

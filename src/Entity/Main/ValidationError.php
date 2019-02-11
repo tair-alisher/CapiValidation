@@ -7,9 +7,9 @@ use Ramsey\Uuid\Uuid;
 
 /**
  * @ORM\Table(name="public.check_error")
- * @ORM\Entity(repositoryClass="App\Repository\Main\CheckErrorRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\Main\ValidationErrorRepository")
  */
-class CheckError
+class ValidationError
 {
     /**
      * @ORM\Id

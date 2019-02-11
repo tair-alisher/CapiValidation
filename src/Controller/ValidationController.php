@@ -75,7 +75,7 @@ class ValidationController extends AbstractController
             $response['success'] = true;
             $response['message'] = 'Validation created successfuly.';
         } catch (\Exception $e) {
-            $response['message'] = $e->getMessage();
+            $response['message'] = 'ошибка: ' . $e->getMessage();
         }
 
         return new JsonResponse($response);

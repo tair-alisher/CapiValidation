@@ -2,12 +2,13 @@
 
 namespace App\Service;
 
-use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Main\Validation;
+use App\Entity\Main\LogicOperator;
 use App\Entity\Main\InputValueType;
+use App\Entity\Main\AnswerIndicator;
 use App\Entity\Main\CompareOperator;
 use App\Entity\Main\ComparedValueType;
-use App\Entity\Main\AnswerIndicator;
-use App\Entity\Main\LogicOperator;
+use Doctrine\ORM\EntityManagerInterface;
 
 class Getter
 {
@@ -19,6 +20,54 @@ class Getter
     public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
+    }
+
+    /**
+     * Returns InputValueType repository
+     */
+    public function inputValueTypeRepo()
+    {
+        return $this->em->getRepository(InputValueType::class);
+    }
+
+    /**
+     * Returns AnswerIndicator repository
+     */
+    public function answerIndicatorRepo()
+    {
+        return $this->em->getRepository(AnswerIndicator::class);
+    }
+
+    /**
+     * Returns ComparedValueType repository
+     */
+    public function comparedValueTypeRepo()
+    {
+        return $this->em->getRepository(ComparedValueType::class);
+    }
+
+    /**
+     * Returns CompareOperator repository
+     */
+    public function compareOperatorRepo()
+    {
+        return $this->em->getRepository(CompareOperator::class);
+    }
+
+    /**
+     * Returns Validation repository
+     */
+    public function validationRepo()
+    {
+        return $this->em->getRepository(Validation::class);
+    }
+
+    /**
+     * Returns LogicOperator repository
+     */
+    public function logicOperatorRepo()
+    {
+        return $this->em->getRepository(LogicOperator::class);
     }
 
     /**

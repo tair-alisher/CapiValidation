@@ -26,7 +26,7 @@ class ComparedValue
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Main\Validation", inversedBy="comparedValues")
-     * @ORM\JoinColumn(name="valdation_id")
+     * @ORM\JoinColumn(name="validation_id")
      */
     private $validation;
 
@@ -154,6 +154,26 @@ class ComparedValue
     public function setValueType(?ComparedValueType $valueType)
     {
         $this->valueType = $valueType;
+    }
+
+    /**
+     * Get $value
+     *
+     * @return string
+     */
+    public function getValue(): ?string
+    {
+        return $this->value;
+    }
+
+    /**
+     * Set $value
+     *
+     * @param string
+     */
+    public function setValue(string $value)
+    {
+        $this->value = $value;
     }
 
     /**

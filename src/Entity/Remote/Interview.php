@@ -40,6 +40,13 @@ class Interview
     private $answers;
 
     /**
+     * Field for mapping query resutls
+     *
+     * type is string associative string array [question => answer]
+     */
+    private $questionsAndAnswers;
+
+    /**
      * Get $interviewId
      *
      * @return string
@@ -117,5 +124,25 @@ class Interview
     public function setAnswers(array $answers)
     {
         $this->answers = $answers;
+    }
+
+    /**
+     * Get $questionsAndAnswers
+     *
+     * @return array
+     */
+    public function getQuestionsAndAnswers()
+    {
+        return $this->questionsAndAnswers;
+    }
+
+    /**
+     * Set $questionsAndAnswers
+     *
+     * @param array
+     */
+    public function setQuestionsAndAnswers($array)
+    {
+        $this->questionsAndAsnwers = $array;
     }
 }

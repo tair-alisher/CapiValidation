@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Remote\Questionnaire;
-use App\Repository\Main\CheckErrorRepository;
+use App\Repository\Main\ValidationErrorRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\ORM\EntityManagerInterface;
@@ -31,7 +31,7 @@ class QuestionnaireController extends AbstractController
     /**
      * @Route("/questionnaire/{id}/errors", name="questionnaire.errors")
      */
-    public function checkErrors(CheckErrorRepository $errorRepository, $id)
+    public function validationErrors(ValidationErrorRepository $errorRepository, $id)
     {
         $errors = $errorRepository->getAllByQuestionnaireId($id);
 

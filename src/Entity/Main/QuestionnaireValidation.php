@@ -23,12 +23,6 @@ class QuestionnaireValidation
     private $questionnaireId;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Remote\Questionnaire", inversedBy="questionnaireValidations")
-     * @ORM\JoinColumn(name="questionnaire_id")
-     */
-    private $questionnaire;
-
-    /**
      * @ORM\Column(type="guid", name="validation_id")
      */
     private $validationId;
@@ -78,26 +72,6 @@ class QuestionnaireValidation
     }
 
     /**
-     * Get $questionnaire
-     *
-     * @return App\Entity\Remote\Questionnaire
-     */
-    public function getQuestionnaire(): ?\App\Entity\Remote\Questionnaire
-    {
-        return $this->questionnaire;
-    }
-
-    /**
-     * Set $questionnaire
-     *
-     * @param App\Entity\Remote\Questionnaire
-     */
-    public function setQuestionnaire(?\App\Entity\Remote\Questionnaire $questionnaire)
-    {
-        $this->questionnaire = $questionnaire;
-    }
-
-    /**
      * Get $validationId
      *
      * @return guid
@@ -122,7 +96,7 @@ class QuestionnaireValidation
      *
      * @return App\Entity\Main\Validation
      */
-    public function getValidation(): ?\App\Entity\Main\Validation
+    public function getValidation(): ?Validation
     {
         return $this->validation;
     }
@@ -132,7 +106,7 @@ class QuestionnaireValidation
      *
      * @param App\Entity\Main\Validation
      */
-    public function setValidation(?\App\Entity\Main\Validation $validation)
+    public function setValidation(?Validation $validation)
     {
         $this->validation = $validation;
     }

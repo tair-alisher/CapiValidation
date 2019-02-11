@@ -80,18 +80,14 @@ class InterviewRepository extends ServiceEntityRepository
             });
             if (count($filterResults) > 0) {
                 $interview = $filterResults[0];
-                $questions = $interview->getQuestions();
-                array_push($questions, $row['question']);
-                $interview->setQuestions($questions);
-                $answers = $interview->getAnswers();
-                array_push($answers, $row['answer']);
-                $interview->setAnswers($answers);
+                $questionsAndAnswers = $interview->getQuestionsAndAnswers();
+                array_push($questionsAndAnswers, array($row['question'] => $row['answer']));
+                $interview->setQuestionsAndAnswers($questionsAndAnswers);
             } else {
                 $interview = new Interview();
                 $interview->setInterviewId($row['interview_id']);
                 $interview->setQuestionnaireId($row['questionnaire_id']);
-                $interview->setQuestions(array($row['question']));
-                $interview->setAnswers(array($row['answer']));
+                $interview->setQuestionsAndAnswers(array($row['question'] => $row['answer']));
 
                 array_push($interviews, $interview);
             }

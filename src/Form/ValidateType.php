@@ -18,16 +18,11 @@ class ValidateType extends AbstractType
     {
         /** var \App\Repository\Remove\QuestionnaireRepository $questionnareRepository */
         $questionnaireRepository = $options['questionnaire_repository'];
-        $questionnaires = $questionnaireRepository->findAll();
-        $arr = [];
-
-        foreach ($questionnaires as $questionnaire) {
-            $arr[$questionnaire->getTitle()] = $questionnaire->getId();
-        }
+        $questionnaires = $questionnaireRepository->getTitleIdArray();
 
         $builder
             ->add('questionnaire', ChoiceType::class, [
-                'choices' => $arr,
+                'choices' => $questionnaires,
                 'label' => 'Форма'
             ])
             ->add('quarter', NumberType::class, [
