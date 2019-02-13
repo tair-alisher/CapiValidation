@@ -139,9 +139,15 @@ class ValidationController extends AbstractController
             $month = $form["month"]->getData();
             $area = $form["area"]->getData();
 
-            if ($validator->validate($questionnaireId, $month)) {
-                return $this->redirectToRoute('questionnaire.errors', ['id' => $questionnaireId]);
-            }
+//            if ($validator->validate($questionnaireId, $month)) {
+//                return $this->redirectToRoute('questionnaire.errors', ['id' => $questionnaireId]);
+//            }
+
+            $expression = $validator->validate($questionnaireId, $month);
+
+            return $this->render('validation/expression.html.twig', [
+                'expression' => $expression
+            ]);
         }
 
         return $this->render('validation/validate.html.twig', [

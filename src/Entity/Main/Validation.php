@@ -178,7 +178,7 @@ class Validation
     /**
      * Get $answerType
      *
-     * @return App\Entity\Main\InputValueType
+     * @return \App\Entity\Main\InputValueType
      */
     public function getAnswerType(): ?InputValueType
     {
@@ -188,11 +188,21 @@ class Validation
     /**
      * Set $answerType
      *
-     * @param App\Entity\Main\InputValueType
+     * @param \App\Entity\Main\InputValueType
      */
     public function setAnswerType(?InputValueType $type)
     {
         $this->answerType = $type;
+    }
+
+    /**
+     * Returns answer's type name
+     *
+     * @return null|string
+     */
+    public function getAnswerTypeName(): ?string
+    {
+        return $this->getAnswerType()->getValueType()->getName();
     }
 
     /**
@@ -218,7 +228,7 @@ class Validation
     /**
      * Get $answerIndicator
      *
-     * @return App\Entity\Main\AnswerIndicator
+     * @return \App\Entity\Main\AnswerIndicator
      */
     public function getAnswerIndicator(): ?AnswerIndicator
     {
@@ -228,7 +238,7 @@ class Validation
     /**
      * Set $answerIndicator
      *
-     * @return App\Entity\Main\AnswerIndicator
+     * @return \App\Entity\Main\AnswerIndicator
      */
     public function setAnswerIndicator(?AnswerIndicator $indicator)
     {
@@ -288,7 +298,7 @@ class Validation
     /**
      * Get $relAnswerType
      *
-     * @return App\Entity\Main\ComparedValueType
+     * @return \App\Entity\Main\ComparedValueType
      */
     public function getRelAnswerType(): ?ComparedValueType
     {
@@ -298,7 +308,7 @@ class Validation
     /**
      * Set $relAnswerType
      *
-     * @param App\Entity\Main\ComparedValueType
+     * @param \App\Entity\Main\ComparedValueType
      */
     public function setRelAnswerType(?ComparedValueType $type)
     {
@@ -348,7 +358,7 @@ class Validation
     /**
      * Get $relAnswerCompareOperator
      *
-     * @return App\Entity\Main\CompareOperator
+     * @return \App\Entity\Main\CompareOperator
      */
     public function getRelAnswerCompareOperator(): ?CompareOperator
     {
@@ -358,7 +368,7 @@ class Validation
     /**
      * Set $relAnswerCompareOperator
      *
-     * @param App\Entity\Main\CompareOperator
+     * @param \App\Entity\Main\CompareOperator
      */
     public function setRelAnswerCompareOperator(?CompareOperator $compareOperator)
     {

@@ -99,7 +99,7 @@ class ComparedValue
     /**
      * Get $validation
      *
-     * @return App\Entity\Main\Validation
+     * @return \App\Entity\Main\Validation
      */
     public function getValidation(): ?Validation
     {
@@ -109,7 +109,7 @@ class ComparedValue
     /**
      * Set $validation
      *
-     * @param App\Entity\Main\Validation
+     * @param \App\Entity\Main\Validation
      */
     public function setValidation(?Validation $validation)
     {
@@ -139,7 +139,7 @@ class ComparedValue
     /**
      * Get $valueType
      *
-     * @return App\Entity\Main\ComparedValueType
+     * @return \App\Entity\Main\ComparedValueType
      */
     public function getValueType(): ?ComparedValueType
     {
@@ -149,11 +149,21 @@ class ComparedValue
     /**
      * Set $valueType
      *
-     * @param App\Entity\Main\ComparedValueType
+     * @param \App\Entity\Main\ComparedValueType
      */
     public function setValueType(?ComparedValueType $valueType)
     {
         $this->valueType = $valueType;
+    }
+
+    /**
+     * Returns value type name
+     *
+     * @return null|string
+     */
+    public function getValueTypeName(): ?string
+    {
+        return $this->getValueType()->getValueType()->getName();
     }
 
     /**
@@ -199,7 +209,7 @@ class ComparedValue
     /**
      * Get $compareOperator
      *
-     * @return App\Entity\Main\CompareOperator
+     * @return \App\Entity\Main\CompareOperator
      */
     public function getCompareOperator(): ?CompareOperator
     {
@@ -209,11 +219,21 @@ class ComparedValue
     /**
      * Set $compareOperator
      *
-     * @param App\Entity\Main\CompareOperator
+     * @param \App\Entity\Main\CompareOperator
      */
     public function setCompareOperator(?CompareOperator $operator)
     {
         $this->compareOperator = $operator;
+    }
+
+    /**
+     * Returns compare operator name
+     *
+     * @return null|string
+     */
+    public function getCompareOperatorName(): ?string
+    {
+        return $this->getCompareOperator()->getOperatorValue()->getName();
     }
 
     /**
@@ -239,7 +259,7 @@ class ComparedValue
     /**
      * Get $logicOperator
      *
-     * @return App\Entity\Main\LogicOperator
+     * @return \App\Entity\Main\LogicOperator
      */
     public function getLogicOperator(): ?LogicOperator
     {
@@ -249,10 +269,20 @@ class ComparedValue
     /**
      * Set $logicOperator
      *
-     * @param App\Entity\Main\LogicOperator
+     * @param \App\Entity\Main\LogicOperator
      */
     public function setLogicOperator(?LogicOperator $operator)
     {
         $this->logicOperator = $operator;
+    }
+
+    /**
+     * Returns logic operator name
+     *
+     * @return null|string
+     */
+    public function getLogicOperatorName(): ?string
+    {
+        return $this->getLogicOperator()->getOperatorValue()->getName();
     }
 }

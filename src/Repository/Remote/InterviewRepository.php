@@ -60,7 +60,8 @@ class InterviewRepository extends ServiceEntityRepository
         where
             extract(month from summary.updatedate) = :month and
             question_entity.stata_export_caption is not null and
-            summary.questionnaireidentity = :questionnaire_id
+            summary.questionnaireidentity = :questionnaire_id and
+            summary.wasrejectedbysupervisor = false
         limit 100
         ';
 
@@ -80,9 +81,7 @@ class InterviewRepository extends ServiceEntityRepository
             });
             if (count($filterResults) > 0) {
                 $interview = $filterResults[0];
-                $questionsAndAnswers = $interview->getQuestionsAndAnswers();
-                array_push($questionsAndAnswers, array($row['question'] => $row['answer']));
-                $interview->setQuestionsAndAnswers($questionsAndAnswers);
+                $interview->pushToQuestionsAndAnswers(array($row['question'] => $row['answer']));
             } else {
                 $interview = new Interview();
                 $interview->setInterviewId($row['interview_id']);

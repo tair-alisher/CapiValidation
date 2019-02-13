@@ -18,7 +18,7 @@ use App\Repository\Main\ValidationErrorRepository;
 class Validator
 {
     private $em;
-    private $interivewRepo;
+    private $interviewRepo;
     private $validationRepo;
     private $errorRepo;
     private $getter;
@@ -26,21 +26,21 @@ class Validator
     /**
      * Constructor
      *
-     * @param Doctrine\ORM\EntityManagerInterface
-     * @param App\Repository\Remote\InterviewRepository
-     * @param App\Repository\Main\ValidationRepository
-     * @param App\Repository\Main\ValidationErrorRepository
-     * @param App\Service\Getter;
+     * @param \Doctrine\ORM\EntityManagerInterface
+     * @param \App\Repository\Remote\InterviewRepository
+     * @param \App\Repository\Main\ValidationRepository
+     * @param \App\Repository\Main\ValidationErrorRepository
+     * @param \App\Service\Getter;
      */
     public function __construct(
         EntityManagerInterface $em,
-        InterviewRepository $interivewRepo,
+        InterviewRepository $interviewRepo,
         ValidationRepository $validationRepo,
         ValidationErrorRepository $errorRepo,
         Getter $getter)
     {
         $this->em = $em;
-        $this->questionnaireRepo = $interivewRepo;
+        $this->interviewRepo = $interviewRepo;
         $this->validationRepo = $validationRepo;
         $this->errorRepo = $errorRepo;
         $this->getter = $getter;
@@ -49,7 +49,7 @@ class Validator
     /**
      * Creates validation, its compared values, binds validation to questionnaires
      *
-     * @param App\Entity\Main\Validation
+     * @param \App\Entity\Main\Validation
      *
      * @return bool
      */
@@ -132,43 +132,46 @@ class Validator
     }
 
     /**
-     * Validates questionnaire inteview data for a specific month
+     * Validates questionnaire's interview data for a specific month
      *
      * @param string
      * @param int
      *
-     * @return bool
+     * @return string
      */
     public function validate($questionnaireId, $month)
     {
         $this->errorRepo->deleteRowsByQuestionnaireId($questionnaireId);
-        $interviews = $this->interviewRepo->getInterviewsByQuestoinnaireIdAndMonth($questionnaireId, $month);
+        $interviews = $this->interviewRepo->getInterviewsByQuestionnaireIdAndMonth($questionnaireId, $month);
         $validations = $this->validationRepo->getAllByQuestionnaireId($questionnaireId);
+        var_dump($validations);
 
         foreach ($interviews as $interview) {
             $questionsAndAnswers = $interview->getQuestionsAndAnswers();
-            foreach (array_keys($questionAndAnswers) as $question) {
-                $answer = $questionAndAnswers[$question];
-                $questionValidations = array_filter($validations, function ($_validation) {
+            foreach ($questionsAndAnswers as $key => $questionAndAnswer) {
+                $question = key($questionAndAnswer);
+                $answer = $questionAndAnswer[$question];
+                $questionValidations = array_filter($validations, function ($_validation) use ($question) {
                     return $_validation->getAnswerCode() == $question;
                 });
 
                 foreach ($questionValidations as $validation) {
-                    $answerType = $validation->getAnswerType()->getValueType()->getName();
+                    $succeeded = true;
+                    $answerType = $validation->getAnswerTypeName();
                     $answerIndicator = $validation->getAnswerIndicator()->getName();
 
                     if ($answerIndicator == 'length') {
                         $answer = strlen($answer);
                     } else {
                         if ($answerType == 'datetime') {
-                            $answer = date_create_from_format('d.m.Y', $comparedValue);
+                            $answer = date_create_from_format('d.m.Y', $answer);
                         } else {
                             eval('$answer = ' . "({$answerType}){$answer};");
                         }
                     }
 
                     // Все сравниваемые значения
-                    $comparedValues = $vaildation->getComparedValues();
+                    $comparedValues = $validation->getComparedValues();
                     $expression = '$succeeded = ';
 
                     // Обработка первого сравниваемого значения
@@ -176,79 +179,52 @@ class Validator
                         return $_cv->getLogicOperator() == null;
                     })[0];
 
-                    $firstComparedValueExpr = $this->generateComparedValeuExpression($firstComparedValue, $answer);
+                    $comparedValuesExpr = $this->buildFirstComparedValueExpression($firstComparedValue, $answer, $questionsAndAnswers);
 
                     // Обработка всех последующих сравниваемых значений
                     $nextComparedValues = array_diff($comparedValues, $firstComparedValue);
-                    foreach ($nextComparedValues as $nextComparedValue) {
-                        $compareOperator = $nextComparedValue->getOperatorValue()->getName();
-                        $copmaredValueType = $nextComparedValue->getValueType()->getName();
-                        $comparedValue = $nextComparedValue->getValue();
 
-                        switch ($copmaredValueType) {
-                            case 'int_set':
-                                $comparedValue = new Set($comparedValue, 'integer');
-                                $result = "(";
-                                foreach ($comparedValue->values() as $value) {
-                                    $result .= " ({$answer} {$compareOperator} {$value}) or";
-                                }
-                                $result = preg_replace('/\W\w+\s*(\W*)$/', '$1', $result);
-                                $result .= ")";
-                                break;
-                            case 'str_set':
-                                $comparedValue = new Set($comparedValue, 'string');
-                                $result = "(";
-                                foreach ($comparedValue->values() as $value) {
-                                    $result .= " ({$answer} {$compareOperator} {$value}) or";
-                                }
-                                $result = preg_replace('/\W\w+\s*(\W*)$/', '$1', $result);
-                                $result .= ")";
-                                break;
-                            case 'range':
-                                $comparedValue = new Range($comparedValue);
-                                $from = $comparedValue->from();
-                                $to = $comparedValue->to();
-                                $result = "({$answer} >= {$from} && {$answer} <= {$to})";
-                                break;
-                            case 'null':
-                                $result = "({$answer}) {$compareOperator} null)";
-                                break;
-                            case 'datetime':
-                                $comparedValue = date_create_from_format('d.m.Y', $comparedValue);
-                                $result = "({$answer} {$compareOperator} {$comparedValue})";
-                                break;
-                            default:
-                                $result = "({$answer} {$compareOperator} ({$comparedValueType}){$comparedValue})";
-                        }
+                    if (count($nextComparedValues) > 0) {
+                        $comparedValuesExpr .= $this->buildNextComparedValuesExpression($nextComparedValues, $answer, $questionsAndAnswers);
+                    } else {
+                        $comparedValuesExpr .= ")";
                     }
+
 
                     $expression .= $comparedValuesExpr;
+                    return $expression;
 
-                    eval($expression);
-
-                    if (!$succeeded) {
-                        $validationError = new ValidationError();
-                        $validationError->setInterviewId($interview->getInterviewId());
-                        $validationError->setQuestionnaireId($interview->getQuestionnaireId());
-                        $validationError->setDescription($validation->getTitle());
-
-                        $this->em->persist($validationError);
-                    }
+//                    eval($expression);
+//
+//                    if (!$succeeded) {
+//                        $validationError = new ValidationError();
+//                        $validationError->setInterviewId($interview->getInterviewId());
+//                        $validationError->setQuestionnaireId($interview->getQuestionnaireId());
+//                        $validationError->setDescription($validation->getTitle());
+//
+//                        $this->em->persist($validationError);
+//                    }
                 }
             }
-            $this->em->flush();
+//            $this->em->flush();
         }
 
-        return true;
+        return "";
     }
 
-    private function generateComparedValueExpression(object $comparedValueObj, $answer): string
+    /**
+     * @param ComparedValue $comparedValueObj
+     * @param $answer
+     * @param $questionsAndAnswers
+     * @return string
+     */
+    private function buildFirstComparedValueExpression(ComparedValue $comparedValueObj, $answer, $questionsAndAnswers): string
     {
-        $compareOperator = $comparedValueObj->getOperatorValue()->getName();
-        $comparedValueType = $comparedValueObj->getValueType()->getName();
+        $compareOperator = $comparedValueObj->getCompareOperatorName();
+        $comparedValueType = $comparedValueObj->getValueTypeName();
         $comparedValue = $comparedValueObj->getValue();
 
-        $result = "";
+        $result = '';
 
         switch ($comparedValueType) {
             case 'int_set':
@@ -257,8 +233,8 @@ class Validator
                 foreach ($comparedValue->values() as $value) {
                     $result .= " ({$answer} {$compareOperator} {$value}) or";
                 }
+                // remove last 'or'
                 $result = preg_replace('/\W\w+\s*(\W*)$/', '$1', $result);
-                $result .= ")";
                 break;
             case 'str_set':
                 $comparedValue = new Set($comparedValue, 'string');
@@ -266,25 +242,105 @@ class Validator
                 foreach ($comparedValue->values() as $value) {
                     $result .= " ({$answer} {$compareOperator} {$value}) or";
                 }
+                // remove last 'or'
                 $result = preg_replace('/\W\w+\s*(\W*)$/', '$1', $result);
-                $result .= ")";
                 break;
             case 'range':
                 $comparedValue = new Range($comparedValue);
                 $from = $comparedValue->from();
                 $to = $comparedValue->to();
-                $result = "({$answer} >= {$from} && {$answer} <= {$to})";
+                $result = " ({$answer} >= {$from} && {$answer} <= {$to}";
                 break;
             case 'null':
-                $result = "({$answer}) {$compareOperator} null)";
+                $result = " ({$answer}) {$compareOperator} null";
                 break;
             case 'datetime':
                 $comparedValue = date_create_from_format('d.m.Y', $comparedValue);
-                $result = "({$answer} {$compareOperator} {$comparedValue})";
+                $result = " ({$answer} {$compareOperator} {$comparedValue}";
+                break;
+            case 'indicator':
+                $comparedValue = $questionsAndAnswers[$comparedValue];
+                $result = " ({$answer} {$compareOperator} {$comparedValue}";
                 break;
             default:
-                $result = "({$answer} {$compareOperator} ({$comparedValueType}){$comparedValue})";
+                $result = " ({$answer} {$compareOperator} ({$comparedValueType}){$comparedValue}";
         }
+
+        return $result;
+    }
+
+    /**
+     * @param array $comparedValues
+     * @param $answer
+     * @param $questionsAndAnswers
+     * @return string
+     */
+    private function buildNextComparedValuesExpression(array $comparedValues, $answer, $questionsAndAnswers): string
+    {
+        $sumLogicOperatorExists = count(
+            array_filter($comparedValues, function ($_cv) {
+                return $_cv->getLogicOperator == 'sum';
+            })
+        ) > 0;
+
+        if (!$sumLogicOperatorExists) {
+            $result = ')';
+        }
+
+        foreach ($comparedValues as $nextComparedValue) {
+            $compareOperator = $nextComparedValue->getCompareOperatorName();
+            $logicOperator = $nextComparedValue->getLogicOperatorName();
+            $comparedValueType = $nextComparedValue->getValueTypeName();
+            $comparedValue = $nextComparedValue->getValue();
+
+            switch ($comparedValueType) {
+                case 'int_set':
+                    $comparedValue = new Set($comparedValue, 'integer');
+                    $result .= " {$logicOperator} (";
+                    foreach ($comparedValue->values() as $value) {
+                        $result .= " ({$answer} {$compareOperator} {$value}) {$logicOperator}";
+                    }
+                    // remove last logic operator
+                    $result = preg_replace('/\W\w+\s*(\W*)$/', '$1', $result);
+                    $result .= ")";
+                    break;
+                case 'str_set':
+                    $comparedValue = new Set($comparedValue, 'string');
+                    $result .= " {$logicOperator} (";
+                    foreach ($comparedValue->values() as $value) {
+                        $result .= " ({$answer} {$compareOperator} {$value}) {$logicOperator}";
+                    }
+                    // remove last logic operator
+                    $result = preg_replace('/\W\w+\s*(\W*)$/', '$1', $result);
+                    $result .= ")";
+                    break;
+                case 'range':
+                    $comparedValue = new Range($comparedValue);
+                    $from = $comparedValue->from();
+                    $to = $comparedValue->to();
+                    $result = " {$logicOperator} ({$answer} >= {$from} && {$answer} <= {$to})";
+                    break;
+                case 'null':
+                    $result = " {$logicOperator} ({$answer}) {$compareOperator} null)";
+                    break;
+                case 'datetime':
+                    $comparedValue = date_create_from_format('d.m.Y', $comparedValue);
+                    $result = " {$logicOperator} ({$answer} {$compareOperator} {$comparedValue})";
+                    break;
+                case 'indicator':
+                    $comparedValue = $questionsAndAnswers[$comparedValue];
+                    if ($logicOperator == 'sum') {
+                        $result = " + {$comparedValue}";
+                    } else {
+                        $result = " {$logicOperator} ({$answer} {$compareOperator} {$comparedValue})";
+                    }
+                    break;
+                default:
+                    $result = " {$logicOperator} ({$answer} {$compareOperator} ({$comparedValueType}){$comparedValue})";
+            }
+        }
+
+        $result .= $sumLogicOperatorExists ? ')' : '';
 
         return $result;
     }

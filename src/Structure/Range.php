@@ -16,11 +16,11 @@ class Range
     }
 
     /**
-     * Retruns $from value
+     * Returns $from value
      *
      * @return float
      */
-    public function form(): float
+    public function from(): float
     {
         return $this->from;
     }

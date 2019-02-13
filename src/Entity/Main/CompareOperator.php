@@ -60,7 +60,7 @@ class CompareOperator
     /**
      * Set $operatorValue
      *
-     * @param App\Entity\Main\OperatorValue
+     * @param \App\Entity\Main\OperatorValue
      */
     public function setOperatorValue(?OperatorValue $operatorValue)
     {
@@ -70,7 +70,7 @@ class CompareOperator
     /**
      * Get $operatorValue
      *
-     * @return App\Entity\Main\OperatorValue
+     * @return \App\Entity\Main\OperatorValue
      */
     public function getOperatorValue() : ?OperatorValue
     {

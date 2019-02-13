@@ -67,6 +67,9 @@
 # Visual Studio Code
 .vscode
 
+# PhpStorm
+.idea
+
 ###> symfony/webpack-encore-bundle ###
 /node_modules/
 /public/build/

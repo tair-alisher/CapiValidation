@@ -37,7 +37,7 @@ function saveValidation() {
     $('#create-validation-btn').click(function (e) {
       e.preventDefault();
 
-      var validation = {}
+      var validation = {};
       // проверяемый ответ
       validation.title = $('#create_validation_title').val();
       validation.answer = {};
