@@ -62,7 +62,7 @@ class InterviewRepository extends ServiceEntityRepository
             question_entity.stata_export_caption is not null and
             summary.questionnaireidentity = :questionnaire_id and
             summary.wasrejectedbysupervisor = false
-        limit 100
+        limit 1000
         ';
 
         $stmt = $conn->prepare($query);
@@ -80,13 +80,13 @@ class InterviewRepository extends ServiceEntityRepository
                 return $_interview->getInterviewId() == $row['interview_id'];
             });
             if (count($filterResults) > 0) {
-                $interview = $filterResults[0];
+                $interview = array_shift($filterResults);
                 $interview->pushToQuestionsAndAnswers(array($row['question'] => $row['answer']));
             } else {
                 $interview = new Interview();
                 $interview->setInterviewId($row['interview_id']);
                 $interview->setQuestionnaireId($row['questionnaire_id']);
-                $interview->setQuestionsAndAnswers(array($row['question'] => $row['answer']));
+                $interview->pushToQuestionsAndAnswers(array($row['question'] => $row['answer']));
 
                 array_push($interviews, $interview);
             }

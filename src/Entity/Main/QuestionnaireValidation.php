@@ -94,7 +94,7 @@ class QuestionnaireValidation
     /**
      * Get $validation
      *
-     * @return App\Entity\Main\Validation
+     * @return \App\Entity\Main\Validation
      */
     public function getValidation(): ?Validation
     {
@@ -104,7 +104,7 @@ class QuestionnaireValidation
     /**
      * Set $validation
      *
-     * @param App\Entity\Main\Validation
+     * @param \App\Entity\Main\Validation
      */
     public function setValidation(?Validation $validation)
     {

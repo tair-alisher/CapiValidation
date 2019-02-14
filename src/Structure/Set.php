@@ -12,10 +12,10 @@ class Set
      */
     public function __construct(string $input, string $type)
     {
-        $values = explode(',', $input);
+        $this->values = explode(',', $input);
 
         if ($type == 'integer') {
-            array_walk($values, function (&$element) {
+            array_walk($this->values, function (&$element) {
                 $element = (int)$element;
             });
         }

@@ -41,22 +41,15 @@ class ValidationRepository extends ServiceEntityRepository
 
     public function getAllByQuestionnaireId($questionnaireId): array
     {
-        $entityManager = $this->getEntityManager();
-        $validationIds = $entityManager->createQuery(
-            'select qv.validationId
-            from App\Entity\Main\QuestionnaireValidation qv
-            where qv.questionnaireId = :questionnaireId
-            order by qv.id asc'
-        )
+        $validations = $this->getEntityManager()->createQueryBuilder()
+            ->select('validation')
+            ->from('App\Entity\Main\Validation', 'validation')
+            ->innerJoin('validation.questionnaireValidations', 'qv')
+            ->where('qv.questionnaireId = :questionnaireId')
             ->setParameter('questionnaireId', $questionnaireId)
-            ->execute();
-        var_dump(array_values($validationIds));
+            ->getQuery()
+            ->getResult();
 
-        $query = $this->createQueryBuilder('v')
-            ->where('v.id IN(:validation_ids)')
-            ->setParameter(':validation_ids', array_values($validationIds))
-            ->getQuery();
-
-        return $query->execute();
+        return $validations;
     }
 }
