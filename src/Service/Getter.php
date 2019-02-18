@@ -15,7 +15,7 @@ class Getter
     private $em;
 
     /**
-     * @param Doctrine\ORM\EntityManagerInterface $em
+     * @param \Doctrine\ORM\EntityManagerInterface $em
      */
     public function __construct(EntityManagerInterface $em)
     {
@@ -84,6 +84,8 @@ class Getter
             $titleIdArray[$item->getValueType()->getTitle()] = $item->getId();
         }
 
+        ksort($titleIdArray);
+
         return $titleIdArray;
     }
 
@@ -100,6 +102,8 @@ class Getter
         foreach ($items as $item) {
             $titleIdArray[$item->getOperatorValue()->getTitle()] = $item->getId();
         }
+
+        ksort($titleIdArray);
 
         return $titleIdArray;
     }
@@ -118,6 +122,8 @@ class Getter
             $titleIdArray[$item->getValueType()->getTitle()] = $item->getId();
         }
 
+        ksort($titleIdArray);
+
         return $titleIdArray;
     }
 
@@ -134,6 +140,8 @@ class Getter
         foreach ($items as $item) {
             $titleIdArray[$item->getTitle()] = $item->getId();
         }
+
+        ksort($titleIdArray);
 
         return $titleIdArray;
     }

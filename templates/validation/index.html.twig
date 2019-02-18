@@ -9,9 +9,12 @@
   <a href="{{ path('validation.create_form') }}" class="btn btn-primary">Добавить контроль</a>
   <table class="table-sm">
     {% for validation in validations %}
-    <tr>
+    <tr id="validation-{{ validation.id }}">
       <td>{{ validation.title }}</td>
-      <td><button type="button" class="btn btn-primary">action</button></td>
+      <td>
+        {#<a href="" class="btn btn-primary">Редактировать</a>#}
+        <button type="button" class="btn btn-danger remove-validation" data-id="{{ validation.id }}">Удалить</button>
+      </td>
     </tr>
     {% endfor %}
   </table>
@@ -40,4 +43,11 @@
   </ul>
   {% endif %}
 </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+  <script>
+      handleRemoveValidationBtnClick();
+  </script>
 {% endblock %}

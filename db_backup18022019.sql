@@ -162,8 +162,8 @@ ALTER TABLE public.operator_value OWNER TO postgres;
 
 CREATE TABLE public.questionnaire_validation (
     id uuid NOT NULL,
-    questionnaire_id uuid NOT NULL,
-    validation_id uuid NOT NULL
+    validation_id uuid NOT NULL,
+    questionnaire_id character varying(100) NOT NULL
 );
 
 
@@ -182,7 +182,6 @@ CREATE TABLE public.validation (
     rel_answer_code character varying(100),
     rel_answer_type_id uuid,
     rel_answer_value character varying(100),
-    questionnaire_id character varying(100) NOT NULL,
     rel_answer_compare_operator_id uuid
 );
 
@@ -218,7 +217,6 @@ b1406ef4-b6ca-44e7-8bcb-3d7519f22503	длина	length
 
 COPY public.check_error (id, interview_id, questionnaire_id, description) FROM stdin;
 2e4e084a-75c1-4829-a256-49be48f2a90e	986a34f163c248d9a5b2066e8bf7ce2b	99ec076ca90a4bc09abbdca5a5c484e0$1	hhCode больше 20001
-0de7fcb4-e596-456c-9d08-44e46feac051	ad23f24fc7ea4b66b845d84a2b82425c	dfb8314a433945ab8c70fc3763e563f3$1	hhCode больше 20001
 \.
 
 
@@ -232,6 +230,7 @@ COPY public.compare_operator (id, operator_value_id) FROM stdin;
 35a843b3-704a-41b0-aa8b-9bc2b108cf5d	d17dcea1-28c9-45d8-bc6b-56d52838ad6a
 bcea67ae-3768-4327-b0e8-1e1e9ae202a2	99340435-3b89-476c-9ed4-d3a49182a462
 29990644-afcf-4f23-ad0b-d0fc33fc7418	454ca38d-e88a-4a16-9bf2-0884b08084d7
+ac0d3339-ef8a-487f-8e9e-379da984a667	3c8180c9-83ef-4501-b7b6-80ea00b737f6
 \.
 
 
@@ -240,6 +239,8 @@ bcea67ae-3768-4327-b0e8-1e1e9ae202a2	99340435-3b89-476c-9ed4-d3a49182a462
 --
 
 COPY public.compared_value (id, validation_id, c_value_type_id, c_value, c_operator_id, logic_operator_id) FROM stdin;
+2a4db693-3c7b-408b-b02b-fca1e03b5ee6	222a17f2-5f82-458e-908d-5f5cd26905ec	94d00d03-fea2-419b-b8e1-2de057a5dafe	6	ac0d3339-ef8a-487f-8e9e-379da984a667	\N
+ddceaccb-88f4-4016-b77c-4f0f61f89f0a	99be7f56-f4f0-4bfb-9201-683e3acf3d05	872a4c41-0c6e-4d05-aa81-d6ca79fdb802	0	35a843b3-704a-41b0-aa8b-9bc2b108cf5d	\N
 \.
 
 
@@ -253,6 +254,9 @@ b9ff9486-6036-4a3e-9c9f-40398ab16676	5057e34b-c059-405f-898b-163610123c82
 94d00d03-fea2-419b-b8e1-2de057a5dafe	72912b00-9f63-4de9-9c05-30ce06055bff
 a7090024-c1ee-451f-8485-eea5f6e9299d	43b667ff-5f29-41c3-b539-d29b91a3d660
 872a4c41-0c6e-4d05-aa81-d6ca79fdb802	9f80a2c9-e1be-4036-8475-4d49837dbdbd
+dc3c799f-f04f-45f3-8c5c-47c1a95d5018	88465f6b-51ca-4f17-98d2-dff2ca296af8
+97aa541e-1454-46ca-9cc7-687fddc5f43c	4a1192d9-d67a-4888-85d8-3beb82f0961d
+e5ac115e-a3c2-4ec1-8bb4-7af644db626b	69d1dbae-6030-477e-b4cc-f38d22132530
 \.
 
 
@@ -264,6 +268,7 @@ COPY public.input_value_type (id, value_type_id) FROM stdin;
 eb09a27e-f5f9-463a-a155-b389e9beade4	72912b00-9f63-4de9-9c05-30ce06055bff
 12a033eb-fb68-4696-8606-c972accc7ea4	43b667ff-5f29-41c3-b539-d29b91a3d660
 43e46de2-b090-4994-94ac-02a6b4fcabc7	e38f6cb5-9433-4c0d-95b1-21e6ede90d55
+ce0abfc9-4127-4bd9-abcc-e61cc0599f90	4a1192d9-d67a-4888-85d8-3beb82f0961d
 \.
 
 
@@ -274,6 +279,7 @@ eb09a27e-f5f9-463a-a155-b389e9beade4	72912b00-9f63-4de9-9c05-30ce06055bff
 COPY public.logic_operator (id, operator_value_id) FROM stdin;
 55d60e73-fefc-40cb-b750-55f55e5034c2	e7e8c37d-6b18-49b2-8036-139190771f8e
 85dbfbab-036f-4ad9-8bcd-9c9904d79a87	719050e6-a500-4361-839f-e597218979f3
+d842d16d-316d-4a88-8df4-444762dc1037	9ff3bc14-c5ae-42cd-9e85-582c7063d9c7
 \.
 
 
@@ -289,7 +295,8 @@ ca2ab5c8-a3c3-4972-9d68-71fe1344465d	меньше	<
 d17dcea1-28c9-45d8-bc6b-56d52838ad6a	не равно	!=
 99340435-3b89-476c-9ed4-d3a49182a462	больше или равно	>=
 454ca38d-e88a-4a16-9bf2-0884b08084d7	меньше или равно	<=
-9ff3bc14-c5ae-42cd-9e85-582c7063d9c7	сумма	sum
+3c8180c9-83ef-4501-b7b6-80ea00b737f6	равно	==
+9ff3bc14-c5ae-42cd-9e85-582c7063d9c7	плюс	sum
 \.
 
 
@@ -297,7 +304,9 @@ d17dcea1-28c9-45d8-bc6b-56d52838ad6a	не равно	!=
 -- Data for Name: questionnaire_validation; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.questionnaire_validation (id, questionnaire_id, validation_id) FROM stdin;
+COPY public.questionnaire_validation (id, validation_id, questionnaire_id) FROM stdin;
+7248209a-5c43-4847-823d-db02457b3fe5	222a17f2-5f82-458e-908d-5f5cd26905ec	dfb8314a433945ab8c70fc3763e563f3$1
+e59b2e87-52b6-433e-a24e-2c25e8aa9c5e	99be7f56-f4f0-4bfb-9201-683e3acf3d05	dfb8314a433945ab8c70fc3763e563f3$1
 \.
 
 
@@ -305,7 +314,9 @@ COPY public.questionnaire_validation (id, questionnaire_id, validation_id) FROM 
 -- Data for Name: validation; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.validation (id, title, answer_code, answer_type_id, answer_indicator_id, rel_answer_code, rel_answer_type_id, rel_answer_value, questionnaire_id, rel_answer_compare_operator_id) FROM stdin;
+COPY public.validation (id, title, answer_code, answer_type_id, answer_indicator_id, rel_answer_code, rel_answer_type_id, rel_answer_value, rel_answer_compare_operator_id) FROM stdin;
+222a17f2-5f82-458e-908d-5f5cd26905ec	 hhCode: длина значения должна быть равна 6 символам	hhCode	eb09a27e-f5f9-463a-a155-b389e9beade4	b1406ef4-b6ca-44e7-8bcb-3d7519f22503	\N	\N	\N	\N
+99be7f56-f4f0-4bfb-9201-683e3acf3d05	f3r1q6: Если есть вес купленного продукта, должна быть указан единица измерения	f3r1q6	43e46de2-b090-4994-94ac-02a6b4fcabc7	47b00be3-d66a-458e-803b-d7395bde95b0	f3r1q5	872a4c41-0c6e-4d05-aa81-d6ca79fdb802	\N	35a843b3-704a-41b0-aa8b-9bc2b108cf5d
 \.
 
 
@@ -315,13 +326,14 @@ COPY public.validation (id, title, answer_code, answer_type_id, answer_indicator
 
 COPY public.value_type (id, title, name) FROM stdin;
 4a1192d9-d67a-4888-85d8-3beb82f0961d	дата	datetime
-43b667ff-5f29-41c3-b539-d29b91a3d660	нецелое число	double
 9f80a2c9-e1be-4036-8475-4d49837dbdbd	пусто	null
-bd8b584f-1bcf-4e51-9407-eb8186d3a248	множество	plurality
 5057e34b-c059-405f-898b-163610123c82	диапазон	range
 69d1dbae-6030-477e-b4cc-f38d22132530	показатель	indicator
 72912b00-9f63-4de9-9c05-30ce06055bff	целое число	integer
 e38f6cb5-9433-4c0d-95b1-21e6ede90d55	строка	string
+bd8b584f-1bcf-4e51-9407-eb8186d3a248	множество чисел	int_set
+43b667ff-5f29-41c3-b539-d29b91a3d660	нецелое число	float
+88465f6b-51ca-4f17-98d2-dff2ca296af8	множество строк	str_set
 \.
 
 

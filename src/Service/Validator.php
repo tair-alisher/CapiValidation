@@ -156,53 +156,60 @@ class Validator
                 });
 
                 foreach ($questionValidations as $validation) {
-                    $succeeded = true;
-                    $answerType = $validation->getAnswerTypeName();
-                    $answerIndicator = $validation->getAnswerIndicator()->getName();
+                    $relatedAnswerSucceeded = true;
 
-                    $_answer = $this->buildAnswer($answer, $answerType, $answerIndicator);
-
-                    // Все сравниваемые значения
-                    $comparedValues = $validation->getComparedValues()->toArray();
-                    // Обработка первого сравниваемого значения
-                    $appropriateFirstComparedValues = array_filter($comparedValues, function ($_cv) {
-                        return $_cv->getLogicOperator() == null;
-                    });
-
-                    $firstComparedValue = array_shift($appropriateFirstComparedValues);
-
-                    $comparedValuesExpr = $this->buildFirstComparedValueExpression($firstComparedValue, $_answer, $questionsAndAnswers);
-
-                    // Обработка всех последующих сравниваемых значений
-                    $nextComparedValues = array_filter($comparedValues, function ($_cv) {
-                        return $_cv->getLogicOperator() != null;
-                    });
-
-                    if (count($nextComparedValues) > 0) {
-                        $comparedValuesExpr .= $this->buildNextComparedValuesExpression($nextComparedValues, $_answer, $questionsAndAnswers);
-                    } else {
-                        $comparedValuesExpr .= ")";
+                    if ($validation->getRelAnswerCode() != null) {
+                        $relAnswerExpression = $this->buildRelatedAnswerExpression($validation, $questionsAndAnswers);
+                        eval('$relatedAnswerSucceeded = ' . $relAnswerExpression);
                     }
 
-                    $expression .= $comparedValuesExpr . ';';
+                    if ($relatedAnswerSucceeded) {
+                        $succeeded = true;
+                        $answerType = $validation->getAnswerTypeName();
+                        $answerIndicator = $validation->getAnswerIndicator()->getName();
 
-//                    eval($expression);
-//
-//                    if (!$succeeded) {
-//                        $validationError = new ValidationError();
-//                        $validationError->setInterviewId($interview->getInterviewId());
-//                        $validationError->setQuestionnaireId($interview->getQuestionnaireId());
-//                        $validationError->setDescription($validation->getTitle());
-//
-//                        $this->em->persist($validationError);
-//                    }
-                    var_dump($interview->getInterviewId());
-                    var_dump($question . ' ' . $_answer);
-                    var_dump($expression);
-                    $expression = '$succeeded =';
+                        $_answer = $this->buildAnswer($answer, $answerType, $answerIndicator);
+
+                        // Все сравниваемые значения
+                        $comparedValues = $validation->getComparedValues()->toArray();
+                        // Обработка первого сравниваемого значения
+                        $appropriateFirstComparedValues = array_filter($comparedValues, function ($_cv) {
+                            return $_cv->getLogicOperator() == null;
+                        });
+
+                        $firstComparedValue = array_shift($appropriateFirstComparedValues);
+
+                        $comparedValuesExpr = $this->buildFirstComparedValueExpression($firstComparedValue, $_answer, $questionsAndAnswers);
+
+                        // Обработка всех последующих сравниваемых значений
+                        $nextComparedValues = array_filter($comparedValues, function ($_cv) {
+                            return $_cv->getLogicOperator() != null;
+                        });
+
+                        if (count($nextComparedValues) > 0) {
+                            $comparedValuesExpr .= $this->buildNextComparedValuesExpression($nextComparedValues, $_answer, $questionsAndAnswers);
+                        } else {
+                            $comparedValuesExpr .= ")";
+                        }
+
+                        $expression .= $comparedValuesExpr . ';';
+
+                    eval($expression);
+
+                    if (!$succeeded) {
+                        $validationError = new ValidationError();
+                        $validationError->setInterviewId($interview->getInterviewId());
+                        $validationError->setQuestionnaireId($interview->getQuestionnaireId());
+                        $validationError->setDescription($validation->getTitle());
+
+                        $this->em->persist($validationError);
+                    }
+                        $expression = '$succeeded =';
+                    }
+
                 }
             }
-//            $this->em->flush();
+            $this->em->flush();
         }
 
         return $expression;
@@ -225,6 +232,62 @@ class Validator
         return $answer;
     }
 
+    private function buildRelatedAnswerExpression(Validation $validation, $questionsAndAnswers): string
+    {
+        $rAnswerCode = $validation->getRelAnswerCode();
+        $rQuestionAndAnswer = array_filter($questionsAndAnswers, function ($_qa) use ($rAnswerCode) {
+            return key($_qa) == $rAnswerCode;
+        });
+        $rAnswerValue = array_shift($rQuestionAndAnswer)[$rAnswerCode];
+        $rAnswerCompareOperator = $validation->getRelAnswerCompareOperatorName();
+        $rAnswerComparedValue = $validation->getRelAnswerValue();
+        $rAnswerType = $validation->getRelAnswerTypeName();
+
+        switch ($rAnswerType) {
+            case 'int_set':
+                $rAnswerComparedValue = new Set($rAnswerComparedValue, 'integer');
+                $result = ' (';
+                foreach ($rAnswerComparedValue->values() as $value) {
+                    $result .= "({$rAnswerValue} {$rAnswerCompareOperator} {$value} || ";
+                }
+                $result = rtrim($result, ' ||');
+                break;
+            case 'str_set':
+                $rAnswerComparedValue = new Set($rAnswerComparedValue, 'string');
+                $result = ' (';
+                foreach ($rAnswerComparedValue->values() as $value) {
+                    $result .= "({$rAnswerValue} {$rAnswerCompareOperator} {$value} || ";
+                }
+                $result = rtrim($result, ' ||');
+                break;
+            case 'range':
+                $rAnswerComparedValue = new Range($rAnswerComparedValue);
+                $from = $rAnswerComparedValue->from();
+                $to = $rAnswerComparedValue->to();
+                $result = " ({$rAnswerValue} >= {$from} && {$rAnswerValue} <= {$to}";
+                break;
+            case 'null':
+                $result = " ({$rAnswerValue} {$rAnswerCompareOperator} null";
+                break;
+            case 'datetime':
+                $rAnswerValue = date_create_from_format('d.m.Y', $rAnswerValue);
+                $rAnswerComparedValue = date_create_from_format('d.m.Y', $rAnswerComparedValue);
+                $result = " ({$rAnswerValue} {$rAnswerCompareOperator} {$rAnswerComparedValue}";
+                break;
+            case 'indicator':
+                $rQuestionAndAnswer = array_filter($questionsAndAnswers, function ($_qa) use ($rAnswerComparedValue) {
+                    return key($_qa) == $rAnswerComparedValue;
+                });
+                $rAnswerComparedValue = array_shift($rQuestionAndAnswer)[$rAnswerComparedValue];
+                $result = "{$rAnswerValue} {$rAnswerCompareOperator} {$rAnswerComparedValue}";
+                break;
+            default:
+                $result = " ({$rAnswerValue} {$rAnswerCompareOperator} {$rAnswerComparedValue}";
+        }
+
+        return $result . ')';
+    }
+
     /**
      * @param ComparedValue $comparedValueObj
      * @param $answer
@@ -240,22 +303,18 @@ class Validator
         switch ($comparedValueType) {
             case 'int_set':
                 $comparedValue = new Set($comparedValue, 'integer');
-                $result = '';
+                $result = ' (';
                 foreach ($comparedValue->values() as $value) {
-                    $result .= " ({$answer} {$compareOperator} {$value}) ||";
+                    $result .= "({$answer} {$compareOperator} {$value}) || ";
                 }
-                // remove last 'or'
-//                $result = preg_replace('/\W\w+\s*(\W*)$/', '$1', $result);
                 $result = rtrim($result, ' ||');
                 break;
             case 'str_set':
                 $comparedValue = new Set($comparedValue, 'string');
-                $result = '';
+                $result = ' (';
                 foreach ($comparedValue->values() as $value) {
-                    $result .= " ({$answer} {$compareOperator} {$value}) ||";
+                    $result .= "({$answer} {$compareOperator} {$value}) || ";
                 }
-                // remove last 'or'
-//                $result = preg_replace('/\W\w+\s*(\W*)$/', '$1', $result);
                 $result = rtrim($result, ' ||');
                 break;
             case 'range':
@@ -308,23 +367,19 @@ class Validator
             switch ($comparedValueType) {
                 case 'int_set':
                     $comparedValue = new Set($comparedValue, 'integer');
-                    $result .= " {$logicOperator}";
+                    $result .= " {$logicOperator} (";
                     foreach ($comparedValue->values() as $value) {
-                        $result .= " ({$answer} {$compareOperator} {$value}) {$logicOperator}";
+                        $result .= "({$answer} {$compareOperator} {$value}) {$logicOperator} ";
                     }
-                    // remove last logic operator
-//                    $result = preg_replace('/\W\w+\s*(\W*)$/', '$1', $result);
                     $result = rtrim($result, ' ||');
                     $result .= ")";
                     break;
                 case 'str_set':
                     $comparedValue = new Set($comparedValue, 'string');
-                    $result .= " {$logicOperator}";
+                    $result .= " {$logicOperator} (";
                     foreach ($comparedValue->values() as $value) {
-                        $result .= " ({$answer} {$compareOperator} {$value}) {$logicOperator}";
+                        $result .= "({$answer} {$compareOperator} {$value}) {$logicOperator} ";
                     }
-                    // remove last logic operator
-//                    $result = preg_replace('/\W\w+\s*(\W*)$/', '$1', $result);
                     $result = rtrim($result, ' ||');
                     $result .= ")";
                     break;

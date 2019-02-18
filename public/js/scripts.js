@@ -94,6 +94,7 @@ function saveValidation() {
         success: function (response) {
           var parsedResponse = JSON.parse(response);
           if (parsedResponse.success) {
+            window.location.href = '/validation';
             alert('Валидация создана успешно.');
           } else {
             alert('Произошла ошибка. Попробуйте еще раз.');
@@ -101,11 +102,38 @@ function saveValidation() {
           }
         },
         error: function (xhr) {
-          alert('Ajax request failed.');
+          alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
           console.log(xhr.responseText);
         }
       });
-
     });
   });
+}
+
+function handleRemoveValidationBtnClick() {
+    $(document).ready(function () {
+        $('.remove-validation').click(function () {
+            var validationId = $(this).data('id');
+
+            $.ajax({
+                url: '/validation/delete',
+                type: 'POST',
+                data: { 'id': validationId },
+
+                success: function (response) {
+                    if (response.success) {
+                        $('#validation-' + validationId).remove();
+                        alert('Контроль успешно удален.');
+                    } else {
+                        alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+                        console.log(response.message);
+                    }
+                },
+                error: function (xhr) {
+                    alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+                    console.log(xhr.responseText);
+                }
+            });
+        });
+    });
 }

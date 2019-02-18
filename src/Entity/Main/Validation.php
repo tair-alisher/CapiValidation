@@ -256,9 +256,9 @@ class Validation
     }
 
     /**
-     * Get $relAnswerCode
+     * Returns related answer code
      *
-     * @return string
+     * @return null|string
      */
     public function getRelAnswerCode(): ?string
     {
@@ -266,7 +266,7 @@ class Validation
     }
 
     /**
-     * Set $relAnswerCode
+     * Updates related answer code
      *
      * @param string
      */
@@ -293,6 +293,15 @@ class Validation
     public function setRelAnswerTypeId($typeId)
     {
         $this->relAnswerTypeId = $typeId;
+    }
+
+    /**
+     * Returns relAnswerType name
+     * @return null|string
+     */
+    public function getRelAnswerTypeName(): ?string
+    {
+        return $this->getRelAnswerType()->getValueType()->getName();
     }
 
     /**
@@ -373,6 +382,16 @@ class Validation
     public function setRelAnswerCompareOperator(?CompareOperator $compareOperator)
     {
         $this->relAnswerCompareOperator = $compareOperator;
+    }
+
+    /**
+     * Returns relAnswerCompareOperator name
+     *
+     * @return null|string
+     */
+    public function getRelAnswerCompareOperatorName(): ?string
+    {
+        return $this->getRelAnswerCompareOperator()->getOperatorValue()->getName();
     }
 
     /**

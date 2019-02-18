@@ -108,13 +108,48 @@ class ValidationController extends AbstractController
     }
 
     /**
+     * @Route("/validation/delete", name="validation.delete", methods="POST")
+     */
+    public function delete(Request $request, ValidationRepository $valRepo)
+    {
+        $response = array(
+            'success' => false,
+            'message' => ''
+        );
+
+        $id = $request->request->get('id');
+
+        try {
+            // delete validation's compared values
+            $valRepo->removeComparedValuesByValidationId($id);
+
+            // delete validation
+            $em = $this->getDoctrine()->getManager();
+            $validation = $em->getRepository(Validation::class)->find($id);
+            if ($validation) {
+                $em->remove($validation);
+                $em->flush();
+            }
+
+            $response['success'] = true;
+            $response['message'] = 'Контроль удален.';
+
+            // delete validation from questionnaire's validation list
+            $valRepo->removeValidationFromQuestionnaireValidationList($id);
+        } catch (\Exception $e) {
+            $response['message'] = 'ошибка: ' . $e->getMessage();
+        }
+
+        return new JsonResponse($response);
+    }
+
+    /**
      * @Route("/validation/test", name="validation.test")
      */
     public function test(Getter $getter)
     {
         $compareOperators = $getter->getCompareOperators();
         $comparedValueTypes = $getter->getComparedValueTypes();
-
 
         return $this->render('validation/test.html.twig', [
             'compare_operators' => $compareOperators,

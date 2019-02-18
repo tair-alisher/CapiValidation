@@ -62,7 +62,7 @@ class InterviewRepository extends ServiceEntityRepository
             question_entity.stata_export_caption is not null and
             summary.questionnaireidentity = :questionnaire_id and
             summary.wasrejectedbysupervisor = false
-        limit 1000
+        limit 1000;
         ';
 
         $stmt = $conn->prepare($query);

@@ -52,4 +52,34 @@ class ValidationRepository extends ServiceEntityRepository
 
         return $validations;
     }
+
+    /**
+     * Removes comparedValue rows by validationId
+     *
+     * @param $id
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function removeComparedValuesByValidationId($id)
+    {
+        $em = $this->getEntityManager();
+        $query = 'delete from public.compared_value where validation_id = :validation_id;';
+        $statement = $em->getConnection()->prepare($query);
+        $statement->bindValue('validation_id', $id);
+        $statement->execute();
+    }
+
+    /**
+     * Removes validation from questionnaire's validation list
+     *
+     * @param $id
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function removeValidationFromQuestionnaireValidationList($id)
+    {
+        $em = $this->getEntityManager();
+        $query = 'delete from public.questionnaire_validation where validation_id = :validation_id;';
+        $statement = $em->getConnection()->prepare($query);
+        $statement->bindValue('validation_id', $id);
+        $statement->execute();
+    }
 }
