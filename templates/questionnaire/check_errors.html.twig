@@ -5,24 +5,28 @@
 {% block body %}
 <div class="wrapper">
   <h4>Ошибки</h4>
-  <a href="{{ path('questionnaires') }}" class="btn btn-secondary">Назад</a>
+  <a href="{{ path('questionnaires') }}" class="btn btn-secondary">К списку опросников</a>
   <br>
   <br>
-  <table class="table table-striped">
-    <thead>
+  {% if errors|length > 0 %}
+    <table class="table table-striped">
+      <thead>
       <tr>
         <th>Ошибка</th>
         <th></th>
       </tr>
-    </thead>
-    <tbody>
+      </thead>
+      <tbody>
       {% for error in errors %}
         <tr>
           <td>{{ error.description }}</td>
           <td><a href="http://capi.stat.kg/Interview/Review/{{ error.interviewId }}" target="_blank" class="btn btn-primary">Просмотреть интервью</a></td>
         </tr>
       {% endfor %}
-    </tbody>
-  </table>
+      </tbody>
+    </table>
+  {% else %}
+    <p><b><i>Ошибок нет.</i></b></p>
+  {% endif %}
 </div>
 {% endblock %}

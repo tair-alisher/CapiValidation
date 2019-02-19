@@ -23,6 +23,12 @@ class Validator
     private $errorRepo;
     private $getter;
 
+    private $validations;
+    private $interview;
+    private $questionsAndAnswers;
+    private $question;
+    private $answer;
+
     /**
      * Constructor
      *
@@ -50,8 +56,6 @@ class Validator
      * Creates validation, its compared values, binds validation to questionnaires
      *
      * @param \App\Entity\Main\Validation
-     *
-     * @return bool
      */
     public function createValidation($_validation)
     {
@@ -136,106 +140,113 @@ class Validator
      *
      * @param string
      * @param int
-     *
-     * @return string
      */
     public function validate($questionnaireId, $month)
     {
-        $expression = '$succeeded =';
-        $this->errorRepo->deleteRowsByQuestionnaireId($questionnaireId);
+        $this->deleteCurrentQuestionnaireValidationErrors($questionnaireId);
         $interviews = $this->interviewRepo->getInterviewsByQuestionnaireIdAndMonth($questionnaireId, $month);
-        $validations = $this->validationRepo->getAllByQuestionnaireId($questionnaireId);
+        $this->validations = $this->validationRepo->getValidationsByQuestionnaireId($questionnaireId);
 
-        foreach ($interviews as $interview) {
-            $questionsAndAnswers = $interview->getQuestionsAndAnswers();
-            foreach ($questionsAndAnswers as $key => $questionAndAnswer) {
-                $question = key($questionAndAnswer);
-                $answer = $questionAndAnswer[$question];
-                $questionValidations = array_filter($validations, function ($_validation) use ($question) {
-                    return $_validation->getAnswerCode() == $question;
-                });
+        $this->checkInterviewsData($interviews);
 
-                foreach ($questionValidations as $validation) {
-                    $relatedAnswerSucceeded = true;
-
-                    if ($validation->getRelAnswerCode() != null) {
-                        $relAnswerExpression = $this->buildRelatedAnswerExpression($validation, $questionsAndAnswers);
-                        eval('$relatedAnswerSucceeded = ' . $relAnswerExpression);
-                    }
-
-                    if ($relatedAnswerSucceeded) {
-                        $succeeded = true;
-                        $answerType = $validation->getAnswerTypeName();
-                        $answerIndicator = $validation->getAnswerIndicator()->getName();
-
-                        $_answer = $this->buildAnswer($answer, $answerType, $answerIndicator);
-
-                        // Все сравниваемые значения
-                        $comparedValues = $validation->getComparedValues()->toArray();
-                        // Обработка первого сравниваемого значения
-                        $appropriateFirstComparedValues = array_filter($comparedValues, function ($_cv) {
-                            return $_cv->getLogicOperator() == null;
-                        });
-
-                        $firstComparedValue = array_shift($appropriateFirstComparedValues);
-
-                        $comparedValuesExpr = $this->buildFirstComparedValueExpression($firstComparedValue, $_answer, $questionsAndAnswers);
-
-                        // Обработка всех последующих сравниваемых значений
-                        $nextComparedValues = array_filter($comparedValues, function ($_cv) {
-                            return $_cv->getLogicOperator() != null;
-                        });
-
-                        if (count($nextComparedValues) > 0) {
-                            $comparedValuesExpr .= $this->buildNextComparedValuesExpression($nextComparedValues, $_answer, $questionsAndAnswers);
-                        } else {
-                            $comparedValuesExpr .= ")";
-                        }
-
-                        $expression .= $comparedValuesExpr . ';';
-
-                    eval($expression);
-
-                    if (!$succeeded) {
-                        $validationError = new ValidationError();
-                        $validationError->setInterviewId($interview->getInterviewId());
-                        $validationError->setQuestionnaireId($interview->getQuestionnaireId());
-                        $validationError->setDescription($validation->getTitle());
-
-                        $this->em->persist($validationError);
-                    }
-                        $expression = '$succeeded =';
-                    }
-
-                }
-            }
-            $this->em->flush();
-        }
-
-        return $expression;
+        return true;
     }
 
     /**
-     * @param $value
-     * @param $type
-     * @param $indicator
-     * @return \DateTime|false|int|string
+     * Removes questionnaire's existing validation errors
+     *
+     * @param $questionnaireId
      */
-    private function buildAnswer($value, $type, $indicator) {
-        if ($indicator == 'length') {
-            $answer = strlen($value);
-        } else {
-//                            eval('$answer = ' . "({$answerType}){$answer};");
-            $answer = $type == 'datetime' ? date_create_from_format('d.m.Y', $value) : "({$type}){$value}";
-        }
-
-        return $answer;
+    private function deleteCurrentQuestionnaireValidationErrors($questionnaireId)
+    {
+        $this->errorRepo->deleteRowsByQuestionnaireId($questionnaireId);
     }
 
-    private function buildRelatedAnswerExpression(Validation $validation, $questionsAndAnswers): string
+    /**
+     * Validates all interviews data
+     *
+     * @param array $interviews
+     */
+    private function checkInterviewsData(array $interviews)
+    {
+        foreach ($interviews as $interview) {
+            $this->interview = $interview;
+            $this->questionsAndAnswers = $interview->getQuestionsAndAnswers();
+            $this->checkCurrentInterviewData();
+            $this->em->flush();
+        }
+    }
+
+    /**
+     * Validates current interview data
+     */
+    private function checkCurrentInterviewData()
+    {
+        foreach ($this->questionsAndAnswers as $key => $questionAndAnswer) {
+            $this->question = key($questionAndAnswer);
+            $this->answer = $questionAndAnswer[$this->question];
+            $questionValidations = $this->selectValidationsByQuestionCode($this->question);
+
+            $this->checkQuestionValidations($questionValidations);
+        }
+    }
+
+    /**
+     * Returns question validations from all validation list
+     *
+     * @param string $questionCode
+     * @return array
+     */
+    private function selectValidationsByQuestionCode(string $questionCode)
+    {
+        return array_filter($this->validations, function ($_validation) use ($questionCode) {
+            return $_validation->getAnswerCode() == $questionCode;
+        });
+    }
+
+    /**
+     * Passes through all question validations
+     *
+     * @param array $questionValidations
+     */
+    private function checkQuestionValidations(array $questionValidations)
+    {
+        foreach ($questionValidations as $validation) {
+            if ($this->relatedQuestionAnswerIsValid($validation)) {
+                $this->checkQuestionAnswer($validation);
+            }
+        }
+    }
+
+    /**
+     * Checks if related question answer's value is valid
+     *
+     * @param Validation $validation
+     * @return bool
+     */
+    private function relatedQuestionAnswerIsValid(Validation $validation)
+    {
+        $isValid = true;
+
+        if ($validation->getRelAnswerCode() != null) {
+            $expression = $this->buildRelatedAnswerExpression($validation);
+            eval('$isValid = ' . $expression);
+        }
+
+        return $isValid;
+    }
+
+    /**
+     * Builds related answer's logic expression for eval() func
+     *
+     * @param Validation $validation
+     * @param $questionsAndAnswers
+     * @return string
+     */
+    private function buildRelatedAnswerExpression(Validation $validation): string
     {
         $rAnswerCode = $validation->getRelAnswerCode();
-        $rQuestionAndAnswer = array_filter($questionsAndAnswers, function ($_qa) use ($rAnswerCode) {
+        $rQuestionAndAnswer = array_filter($this->questionsAndAnswers, function ($_qa) use ($rAnswerCode) {
             return key($_qa) == $rAnswerCode;
         });
         $rAnswerValue = array_shift($rQuestionAndAnswer)[$rAnswerCode];
@@ -275,26 +286,114 @@ class Validator
                 $result = " ({$rAnswerValue} {$rAnswerCompareOperator} {$rAnswerComparedValue}";
                 break;
             case 'indicator':
-                $rQuestionAndAnswer = array_filter($questionsAndAnswers, function ($_qa) use ($rAnswerComparedValue) {
+                $rQuestionAndAnswer = array_filter($this->questionsAndAnswers, function ($_qa) use ($rAnswerComparedValue) {
                     return key($_qa) == $rAnswerComparedValue;
                 });
                 $rAnswerComparedValue = array_shift($rQuestionAndAnswer)[$rAnswerComparedValue];
                 $result = "{$rAnswerValue} {$rAnswerCompareOperator} {$rAnswerComparedValue}";
                 break;
             default:
-                $result = " ({$rAnswerValue} {$rAnswerCompareOperator} {$rAnswerComparedValue}";
+                $result = " (({$rAnswerType}){$rAnswerValue} {$rAnswerCompareOperator} ({$rAnswerType}){$rAnswerComparedValue}";
         }
 
-        return $result . ')';
+        return $result . ');';
     }
 
     /**
+     * Checks if answer is valid
+     *
+     * @param Validation $validation
+     */
+    private function checkQuestionAnswer(Validation $validation)
+    {
+        $succeeded = true;
+        $answerType = $validation->getAnswerTypeName();
+        $answerIndicator = $validation->getAnswerIndicatorName();
+
+        $answer = $this->buildAnswer($answerType, $answerIndicator);
+        $comparedValues = $validation->getComparedValues()->toArray();
+        $comparedValuesExpression = '$succeeded =';
+
+        $firstComparedValue = $this->getFirstComparedValue($comparedValues);
+        $comparedValuesExpression .= $this->buildFirstComparedValueExpression($firstComparedValue, $answer);
+
+        $nextComparedValues = $this->getComparedValuesExceptFirst($comparedValues);
+        $comparedValuesExpression .= $this->buildNextComparedValuesExpression($nextComparedValues, $answer) . ';';
+
+        eval($comparedValuesExpression);
+
+        if (!$succeeded) {
+            $this->initAndPersistValidationError($validation);
+        }
+    }
+
+    /**
+     * @param $type
+     * @param $indicator
+     * @return \DateTime|false|int|string
+     */
+    private function buildAnswer($type, $indicator) {
+        if ($indicator == 'length') {
+            $answer = strlen($this->answer);
+        } else {
+            // eval('$answer = ' . "({$answerType}){$answer};");
+            $answer = $type == 'datetime' ? date_create_from_format('d.m.Y', $this->answer) : "({$type}){$this->answer}";
+        }
+
+        return $answer;
+    }
+
+    /**
+     * Returns first compared values from the list
+     *
+     * @param array $comparedValues
+     * @return ComparedValue|null
+     */
+    private function getFirstComparedValue(array $comparedValues): ?ComparedValue
+    {
+        $appropriateValues = array_filter($comparedValues, function ($_cv) {
+            return $_cv->getLogicOperator() == null;
+        });
+
+        return array_shift($appropriateValues);
+    }
+
+    /**
+     * Returns compared values except first from the list
+     *
+     * @param array $comparedValues
+     * @return array|null
+     */
+    private function getComparedValuesExceptFirst(array $comparedValues): ?array
+    {
+        return array_filter($comparedValues, function ($_cv) {
+            return $_cv->getLogicOperator() != null;
+        });
+    }
+
+    /**
+     * Creates and persists ValidationError instance
+     *
+     * @param Validation $validation
+     */
+    private function initAndPersistValidationError(Validation $validation)
+    {
+        $error = new ValidationError();
+        $error->setInterviewId($this->interview->getInterviewId());
+        $error->setQuestionnaireId($this->interview->getQuestionnaireId());
+        $error->setDescription($validation->getTitle());
+
+        $this->em->persist($error);
+    }
+
+    /**
+     * Builds first compared value's logic expression for eval() func
+     *
      * @param ComparedValue $comparedValueObj
      * @param $answer
-     * @param $questionsAndAnswers
      * @return string
      */
-    private function buildFirstComparedValueExpression(ComparedValue $comparedValueObj, $answer, $questionsAndAnswers): string
+    private function buildFirstComparedValueExpression(ComparedValue $comparedValueObj, $answer): string
     {
         $compareOperator = $comparedValueObj->getCompareOperatorName();
         $comparedValueType = $comparedValueObj->getValueTypeName();
@@ -331,7 +430,7 @@ class Validator
                 $result = " ({$answer} {$compareOperator} {$comparedValue}";
                 break;
             case 'indicator':
-                $questionAndAnswer = array_filter($questionsAndAnswers, function ($_qa) use ($comparedValue) {
+                $questionAndAnswer = array_filter($this->questionsAndAnswers, function ($_qa) use ($comparedValue) {
                     return key($_qa) == $comparedValue;
                 });
                 $comparedValue = array_shift($questionAndAnswer)[$comparedValue];
@@ -345,75 +444,105 @@ class Validator
     }
 
     /**
+     * Builds compared values' (except first) logic expression for eval() func
+     *
      * @param array $comparedValues
      * @param $answer
-     * @param $questionsAndAnswers
      * @return string
      */
-    private function buildNextComparedValuesExpression(array $comparedValues, $answer, $questionsAndAnswers): string
+    private function buildNextComparedValuesExpression(array $comparedValues, $answer): string
+    {
+        if (count($comparedValues) <= 0) { return ')'; }
+
+        $existsComparedValueWithSumLogicOperator = $this->existsComparedValueWithSumLogicOperator($comparedValues);
+        $expression = $existsComparedValueWithSumLogicOperator ? '' : ')';
+        foreach ($comparedValues as $nextComparedValue) {
+            $expression .= $this->buildExpressionForCurrentComparedValue($nextComparedValue, $answer);
+        }
+        $expression .= $existsComparedValueWithSumLogicOperator ? ')' : '';
+
+        return $expression;
+    }
+
+    /**
+     * Returns true if in the list of compared values exists compared value with a 'sum' logic operator, otherwise false
+     *
+     * @param array $comparedValues
+     * @return bool
+     */
+    private function existsComparedValueWithSumLogicOperator(array $comparedValues)
     {
         $valuesWithSumLogicOperator = array_filter($comparedValues, function ($_cv) {
             return $_cv->getLogicOperatorName() == 'sum';
         });
 
-        $result = count($valuesWithSumLogicOperator) > 0  ? '' : ')';
+        return count($valuesWithSumLogicOperator) > 0;
+    }
 
-        foreach ($comparedValues as $nextComparedValue) {
-            $compareOperator = $nextComparedValue->getCompareOperatorName();
-            $logicOperator = $nextComparedValue->getLogicOperatorName();
-            $comparedValueType = $nextComparedValue->getValueTypeName();
-            $comparedValue = $nextComparedValue->getValue();
+    /**
+     * Builds for given compared value logic expression for eval() func
+     *
+     * @param ComparedValue $nextComparedValue
+     * @param $answer
+     * @return string
+     */
+    private function buildExpressionForCurrentComparedValue(ComparedValue $nextComparedValue, $answer)
+    {
+        $compareOperator = $nextComparedValue->getCompareOperatorName();
+        $logicOperator = $nextComparedValue->getLogicOperatorName();
+        $comparedValueType = $nextComparedValue->getValueTypeName();
+        $comparedValue = $nextComparedValue->getValue();
 
-            switch ($comparedValueType) {
-                case 'int_set':
-                    $comparedValue = new Set($comparedValue, 'integer');
-                    $result .= " {$logicOperator} (";
-                    foreach ($comparedValue->values() as $value) {
-                        $result .= "({$answer} {$compareOperator} {$value}) {$logicOperator} ";
-                    }
-                    $result = rtrim($result, ' ||');
-                    $result .= ")";
-                    break;
-                case 'str_set':
-                    $comparedValue = new Set($comparedValue, 'string');
-                    $result .= " {$logicOperator} (";
-                    foreach ($comparedValue->values() as $value) {
-                        $result .= "({$answer} {$compareOperator} {$value}) {$logicOperator} ";
-                    }
-                    $result = rtrim($result, ' ||');
-                    $result .= ")";
-                    break;
-                case 'range':
-                    $comparedValue = new Range($comparedValue);
-                    $from = $comparedValue->from();
-                    $to = $comparedValue->to();
-                    $result .= " {$logicOperator} ({$answer} >= {$from} && {$answer} <= {$to})";
-                    break;
-                case 'null':
-                    $result .= " {$logicOperator} ({$answer}) {$compareOperator} null)";
-                    break;
-                case 'datetime':
-                    $comparedValue = date_create_from_format('d.m.Y', $comparedValue);
-                    $result .= " {$logicOperator} ({$answer} {$compareOperator} {$comparedValue})";
-                    break;
-                case 'indicator':
-                    $questionAndAnswer = array_filter($questionsAndAnswers, function ($_qa) use ($comparedValue) {
-                        return key($_qa) == $comparedValue;
-                    });
-                    $comparedValue = array_shift($questionAndAnswer)[$comparedValue];
-                    if ($logicOperator == 'sum') {
-                        $result .= " + {$comparedValue}";
-                    } else {
-                        $result .= " {$logicOperator} ({$answer} {$compareOperator} {$comparedValue})";
-                    }
-                    break;
-                default:
-                    $result .= " {$logicOperator} ({$answer} {$compareOperator} ({$comparedValueType}){$comparedValue})";
-            }
+        $expression = '';
+
+        switch ($comparedValueType) {
+            case 'int_set':
+                $comparedValue = new Set($comparedValue, 'integer');
+
+                $expression .= " {$logicOperator} (";
+                foreach ($comparedValue->values() as $value) {
+                    $expression .= "({$answer} {$compareOperator} {$value}) {$logicOperator} ";
+                }
+                $expression = rtrim($expression, ' ||');
+                $expression .= ")";
+                break;
+            case 'str_set':
+                $comparedValue = new Set($comparedValue, 'string');
+                $expression .= " {$logicOperator} (";
+                foreach ($comparedValue->values() as $value) {
+                    $expression .= "({$answer} {$compareOperator} {$value}) {$logicOperator} ";
+                }
+                $expression = rtrim($expression, ' ||');
+                $expression .= ")";
+                break;
+            case 'range':
+                $comparedValue = new Range($comparedValue);
+                $from = $comparedValue->from();
+                $to = $comparedValue->to();
+                $expression .= " {$logicOperator} ({$answer} >= {$from} && {$answer} <= {$to})";
+                break;
+            case 'null':
+                $expression .= " {$logicOperator} ({$answer}) {$compareOperator} null)";
+                break;
+            case 'datetime':
+                $comparedValue = date_create_from_format('d.m.Y', $comparedValue);
+                $expression .= " {$logicOperator} ({$answer} {$compareOperator} {$comparedValue})";
+                break;
+            case 'indicator':
+                $questionAndAnswer = array_filter($this->questionsAndAnswers, function ($_qa) use ($comparedValue) {
+                    return key($_qa) == $comparedValue;
+                });
+                $comparedValue = array_shift($questionAndAnswer)[$comparedValue];
+                if ($logicOperator == 'sum') {
+                    $expression .= " + {$comparedValue}";
+                } else {
+                    $expression .= " {$logicOperator} ({$answer} {$compareOperator} {$comparedValue})";
+                }
+                break;
+            default:
+                $expression .= " {$logicOperator} ({$answer} {$compareOperator} ({$comparedValueType}){$comparedValue})";
         }
 
-        $result .= count($valuesWithSumLogicOperator) > 0 ? ')' : '';
-
-        return $result;
+        return $expression;
     }
 }

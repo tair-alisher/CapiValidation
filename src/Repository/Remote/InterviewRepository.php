@@ -69,7 +69,7 @@ class InterviewRepository extends ServiceEntityRepository
         $stmt->execute([
             'questionnaire_id' => $questionnaireId,
             'month' => $month,
-            'no_answer' => 'без ответа'
+            'no_answer' => ''
         ]);
 
         $rows = $stmt->fetchAll();
