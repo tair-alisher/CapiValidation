@@ -1,0 +1,12 @@
+<div class="row questionnaire">
+  <div class="col-md-12 col-sm-12">
+    <div class="form-group">
+      <i><b><label for="" class="required">Опросник*</label></b></i>
+      <select name="create_validation[questionnaireId]" id="create_validation_questionnaireId" class="questionnaire-id form-control">
+        {% for item in questionnaires|keys %}
+          <option value="{{ questionnaires[item] }}">{{ item }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+</div>

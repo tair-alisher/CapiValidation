@@ -1,0 +1,30 @@
+{
+  "emmet.includeLanguages": {
+      "aspnetcorerazor": "html",
+      "twig": "html"
+  },
+  "emmet.syntaxProfiles": {
+    "php": "html"
+  },
+  "workbench.editor.tabCloseButton": "left",
+  "editor.wordWrap": "on",
+  "editor.trimAutoWhitespace": false,
+  "files.trimTrailingWhitespace": true,
+  "editor.renderWhitespace": "all",
+  "editor.codeLens": false,
+  "window.zoomLevel": -1,
+  "workbench.iconTheme": "vscode-icons",
+  "workbench.editor.tabSizing": "shrink",
+  "files.associations": {
+      "*.html": "twig"
+  },
+  "[twig]": {
+      "editor.tabSize": 2
+  },
+  "[javascript]": {
+      "editor.tabSize": 2
+  },
+  "[json]": {
+    "editor.tabSize": 2
+  }
+}

@@ -1,0 +1,95 @@
+Table public__answer_indicator {
+  id uuid[not_null] PK
+  title varchar[50][not_null]
+  name varchar[50][not_null]
+}
+
+Table public__check_error {
+  id uuid[not_null] PK
+  interview_id varchar[100][not_null]
+  questionnaire_id varchar[100][not_null]
+  description text[not_null]]
+}
+
+Table public__compare_operator {
+  id uuid[not_null] PK
+  operator_value_id uuid[not_null]
+}
+
+
+Table public__compared_value {
+  id uuid[not_null] PK
+  validation_id uuid[not_null]
+  c_value_type_id uuid[not_null]
+  c_value varchar[100][nullable]
+  c_operator_id uuid[not_null]
+  logic_operator uuid[nullable]
+}
+
+Table public__compared_value_type {
+  id uuid[not_null] PK
+  value_type_id uuid[not_null]
+}
+
+Table public__input_value_type {
+  id uuid[not_null] PK
+  value_type_id uuid[not_null]
+}
+
+Table public__logic_operator {
+  id uuid[not_null] PK
+  operator_value_id uuid[not_null]
+}
+
+Table public__operator_value {
+  id uuid[not_null] PK
+  title varchar[50][not_null]
+  name varchar[50][not_null]
+}
+
+Table public__questionnaire_validation {
+  id uuid[not_null] PK
+  validation_id uuid[not_null]
+  questionnaire_id uuid[not_null]
+}
+
+Table public__validation {
+  id uuid[not_null] PK
+  title text[not_null]
+  answer_code varchar[100][not_null]
+  answer_type_id uuid[not_null]
+  answer_indicator_id uudi[not_null]
+  rel_answer_code varchar[100][nullable]
+  rel_answer_type_id uuid[nullable]
+  rel_answer_value varchar[100][nullable]
+  rel_answer_compare_operator_id uuid[nullable]
+}
+
+Table public__value_type {
+  id uuid[not_null] PK
+  title varchar[50][not_null]
+  name varchar[50][not_null]
+}
+
+
+Ref: "public__compare_operator"."operator_value_id" > "public__operator_value"."id"
+
+Ref: "public__compared_value"."c_operator_id" > "public__compare_operator"."id"
+
+Ref: "public__compared_value"."c_value_type_id" > "public__compared_value_type"."id"
+
+Ref: "public__compared_value"."validation_id" > "public__validation"."id"
+
+Ref: "public__compared_value_type"."value_type_id" > "public__value_type"."id"
+
+Ref: "public__input_value_type"."value_type_id" > "public__value_type"."id"
+
+Ref: "public__logic_operator"."operator_value_id" > "public__operator_value"."id"
+
+Ref: "public__validation"."answer_indicator_id" > "public__answer_indicator"."id"
+
+Ref: "public__validation"."answer_type_id" > "public__input_value_type"."id"
+
+Ref: "public__validation"."rel_answer_compare_operator_id" > "public__compare_operator"."id"
+
+Ref: "public__validation"."rel_answer_type_id" > "public__compared_value_type"."id"
