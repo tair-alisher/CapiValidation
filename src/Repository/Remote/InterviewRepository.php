@@ -17,7 +17,7 @@ class InterviewRepository extends ServiceEntityRepository
         parent::__construct($registry, Interview::class);
     }
 
-    public function getInterviewsByQuestionnaireIdAndMonth($questionnaireId, $month): array
+    public function getInterviewsByQuestionnaireIdAndMonth($questionnaireId, $month, $offset, $limit): array
     {
         $conn = $this->getEntityManager('server')->getConnection();
 
@@ -62,14 +62,16 @@ class InterviewRepository extends ServiceEntityRepository
             question_entity.stata_export_caption is not null and
             summary.questionnaireidentity = :questionnaire_id and
             summary.wasrejectedbysupervisor = false
-        limit 1000;
+        offset :offset limit :limit;
         ';
 
         $stmt = $conn->prepare($query);
         $stmt->execute([
             'questionnaire_id' => $questionnaireId,
             'month' => $month,
-            'no_answer' => ''
+            'no_answer' => "''",
+            'offset' => $offset,
+            'limit' => $limit
         ]);
 
         $rows = $stmt->fetchAll();

@@ -144,10 +144,18 @@ class Validator
     public function validate($questionnaireId, $month)
     {
         $this->deleteCurrentQuestionnaireValidationErrors($questionnaireId);
-        $interviews = $this->interviewRepo->getInterviewsByQuestionnaireIdAndMonth($questionnaireId, $month);
         $this->validations = $this->validationRepo->getValidationsByQuestionnaireId($questionnaireId);
 
-        $this->checkInterviewsData($interviews);
+        $offset = 0;
+        $limit = 1000;
+        while (true) {
+            $interviews = $this->interviewRepo->getInterviewsByQuestionnaireIdAndMonth($questionnaireId, $month, $offset, $limit);
+            if (count($interviews) <= 0) {
+                break;
+            }
+            $this->checkInterviewsData($interviews);
+            $offset += 1000;
+        }
 
         return true;
     }
@@ -230,6 +238,7 @@ class Validator
 
         if ($validation->getRelAnswerCode() != null) {
             $expression = $this->buildRelatedAnswerExpression($validation);
+//            var_dump($validation->getRelAnswerCode() . ' ' . $this->interview->getInterviewId() . ' ' . $expression);
             eval('$isValid = ' . $expression);
         }
 
@@ -278,6 +287,7 @@ class Validator
                 $result = " ({$rAnswerValue} >= {$from} && {$rAnswerValue} <= {$to}";
                 break;
             case 'null':
+                $rAnswerValue = strlen($rAnswerValue) > 0 ? $rAnswerValue : 'null';
                 $result = " ({$rAnswerValue} {$rAnswerCompareOperator} null";
                 break;
             case 'datetime':
