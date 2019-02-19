@@ -1,0 +1,44 @@
+parameters:
+    # Adds a fallback DATABASE_URL if the env var is not set.
+    # This allows you to run cache:warmup even if your
+    # environment variables are not available yet.
+    # You should not need to change this value.
+    env(DATABASE_URL): ''
+
+doctrine:
+    dbal:
+        default_connection: server
+        connections:
+            default:
+                driver: '%env(LOCAL_DRIVER)%'
+                # server_version: '%env(LOCAL_SERVER_VERSION)%'
+                charset: '%env(LOCAL_CHARSET)%'
+                url: '%env(LOCAL_URL)%'
+                # default_table_options:
+                #     charset: utf8mb4
+                #     collate: utf8mb4_unicode_ci
+            server:
+                driver: '%env(REMOTE_DRIVER)%'
+                charset: '%env(REMOTE_CHARSET)%'
+                url: '%env(REMOTE_URL)%'
+    orm:
+        default_entity_manager: default
+        entity_managers:
+            default:
+                connection: default
+                mappings:
+                    Main:
+                        is_bundle: false
+                        type: annotation
+                        dir: '%kernel.project_dir%/src/Entity/Main'
+                        prefix: 'App\Entity\Main'
+                        alias: Main
+            server:
+                connection: server
+                mappings:
+                    Server:
+                        is_bundle: false
+                        type: annotation
+                        dir: '%kernel.project_dir%/src/Entity/Remote'
+                        prefix: 'App\Entity\Remote'
+                        alias: Remote

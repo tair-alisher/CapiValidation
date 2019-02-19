@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Welcome!{% endblock %}</title>
+  {% block stylesheets %}
+  {{ encore_entry_link_tags('app') }}
+  {% endblock %}
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #FFFFFF; box-shadow: 0px 2px 4px 2px #ccc;">
+    <div class="container">
+      <a class="navbar-brand" href="{{ path('questionnaires') }}">КАПИ</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ path('questionnaires') }}">Главная</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ path('validation') }}">Валидации</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ path('validate') }}">Запуск валидаций</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <div class="container custom-container">
+    {% block body %}{% endblock %}
+  </div>
+  {% block javascripts %}
+  {{ encore_entry_script_tags('app') }}
+  <script src="/js/jquery-3.3.1.min.js"></script>
+  <script src="/js/scripts.js"></script>
+  {% endblock %}
+</body>
+
+</html>

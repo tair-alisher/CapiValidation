@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Опросники{% endblock %}
+
+{% block body %}
+<div class="wrapper">
+  <h4>Опросники</h4>
+  <hr>
+  {% for operator in compare_operators|keys %}
+    <p>{{ compare_operators[operator] }} - {{ operator }}</p>
+  {% endfor %}
+{% endblock %}
