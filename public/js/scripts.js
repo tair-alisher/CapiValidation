@@ -137,3 +137,14 @@ function handleRemoveValidationBtnClick() {
         });
     });
 }
+
+function goToPage() {
+    $(document).ready(function () {
+        $('#go-to-page-btn').click(function () {
+            var page = $('#page-value').val();
+            var questionnaireId = $(this).data('id');
+
+            window.location.href='/questionnaire/' + questionnaireId + '/errors/' + page;
+        })
+    })
+}

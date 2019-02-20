@@ -31,7 +31,7 @@ class QuestionnaireController extends AbstractController
     /**
      * @Route("/questionnaire/{id}/errors/{page}", name="questionnaire.errors")
      */
-    public function validationErrors(ValidationErrorRepository $errorRepository, $id, $page)
+    public function validationErrors(ValidationErrorRepository $errorRepository, $id, $page = 1)
     {
         $limit = 10;
         $errors = $errorRepository->getAllByQuestionnaireId($id, $page, $limit);
@@ -40,7 +40,8 @@ class QuestionnaireController extends AbstractController
         return $this->render('questionnaire/check_errors.html.twig', [
             'errors' => $errors,
             'totalPages' => $totalPages,
-            'currentPage' => $page
+            'currentPage' => $page,
+            'id' => $id
         ]);
     }
 }

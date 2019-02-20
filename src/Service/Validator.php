@@ -25,7 +25,8 @@ class Validator
 
     private $validations;
     private $interview;
-    private $questionsAndAnswers;
+    private $questionsData;
+    private $section;
     private $question;
     private $answer;
 
@@ -179,7 +180,7 @@ class Validator
     {
         foreach ($interviews as $interview) {
             $this->interview = $interview;
-            $this->questionsAndAnswers = $interview->getQuestionsAndAnswers();
+            $this->questionsData = $interview->getQuestionsData();
             $this->checkCurrentInterviewData();
             $this->em->flush();
         }
@@ -190,9 +191,10 @@ class Validator
      */
     private function checkCurrentInterviewData()
     {
-        foreach ($this->questionsAndAnswers as $key => $questionAndAnswer) {
-            $this->question = key($questionAndAnswer);
-            $this->answer = $questionAndAnswer[$this->question];
+        foreach ($this->questionsData as $questionData) {
+            $this->section = $questionData->getSectionId();
+            $this->question = $questionData->getQuestionCode();
+            $this->answer = $questionData->getAnswer();
             $questionValidations = $this->selectValidationsByQuestionCode($this->question);
 
             $this->checkQuestionValidations($questionValidations);
@@ -238,7 +240,6 @@ class Validator
 
         if ($validation->getRelAnswerCode() != null) {
             $expression = $this->buildRelatedAnswerExpression($validation);
-//            var_dump($validation->getRelAnswerCode() . ' ' . $this->interview->getInterviewId() . ' ' . $expression);
             eval('$isValid = ' . $expression);
         }
 
@@ -255,10 +256,8 @@ class Validator
     private function buildRelatedAnswerExpression(Validation $validation): string
     {
         $rAnswerCode = $validation->getRelAnswerCode();
-        $rQuestionAndAnswer = array_filter($this->questionsAndAnswers, function ($_qa) use ($rAnswerCode) {
-            return key($_qa) == $rAnswerCode;
-        });
-        $rAnswerValue = array_shift($rQuestionAndAnswer)[$rAnswerCode];
+        $rAnswerValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId(), $rAnswerCode);
+
         $rAnswerCompareOperator = $validation->getRelAnswerCompareOperatorName();
         $rAnswerComparedValue = $validation->getRelAnswerValue();
         $rAnswerType = $validation->getRelAnswerTypeName();
@@ -296,10 +295,7 @@ class Validator
                 $result = " ({$rAnswerValue} {$rAnswerCompareOperator} {$rAnswerComparedValue}";
                 break;
             case 'indicator':
-                $rQuestionAndAnswer = array_filter($this->questionsAndAnswers, function ($_qa) use ($rAnswerComparedValue) {
-                    return key($_qa) == $rAnswerComparedValue;
-                });
-                $rAnswerComparedValue = array_shift($rQuestionAndAnswer)[$rAnswerComparedValue];
+                $rAnswerComparedValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId, $rAnswerComparedValue);
                 $result = "{$rAnswerValue} {$rAnswerCompareOperator} {$rAnswerComparedValue}";
                 break;
             default:
@@ -440,10 +436,7 @@ class Validator
                 $result = " ({$answer} {$compareOperator} {$comparedValue}";
                 break;
             case 'indicator':
-                $questionAndAnswer = array_filter($this->questionsAndAnswers, function ($_qa) use ($comparedValue) {
-                    return key($_qa) == $comparedValue;
-                });
-                $comparedValue = array_shift($questionAndAnswer)[$comparedValue];
+                $comparedValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId(), $comparedValue);
                 $result = " ({$answer} {$compareOperator} {$comparedValue}";
                 break;
             default:
@@ -539,10 +532,7 @@ class Validator
                 $expression .= " {$logicOperator} ({$answer} {$compareOperator} {$comparedValue})";
                 break;
             case 'indicator':
-                $questionAndAnswer = array_filter($this->questionsAndAnswers, function ($_qa) use ($comparedValue) {
-                    return key($_qa) == $comparedValue;
-                });
-                $comparedValue = array_shift($questionAndAnswer)[$comparedValue];
+                $comparedValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId(), $comparedValue);
                 if ($logicOperator == 'sum') {
                     $expression .= " + {$comparedValue}";
                 } else {
