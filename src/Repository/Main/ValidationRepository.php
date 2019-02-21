@@ -39,7 +39,7 @@ class ValidationRepository extends ServiceEntityRepository
         return $paginator;
     }
 
-    public function getAllByQuestionnaireId($questionnaireId): array
+    public function getValidationsByQuestionnaireId($questionnaireId): array
     {
         $validations = $this->getEntityManager()->createQueryBuilder()
             ->select('validation')

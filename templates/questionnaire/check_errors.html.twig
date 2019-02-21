@@ -5,24 +5,93 @@
 {% block body %}
 <div class="wrapper">
   <h4>Ошибки</h4>
-  <a href="{{ path('questionnaires') }}" class="btn btn-secondary">Назад</a>
+  <a href="{{ path('questionnaires') }}" class="btn btn-secondary">К списку опросников</a>
   <br>
   <br>
-  <table class="table table-striped">
-    <thead>
+  {% if errors|length > 0 %}
+    <table class="table table-striped">
+      <thead>
       <tr>
         <th>Ошибка</th>
         <th></th>
       </tr>
-    </thead>
-    <tbody>
+      </thead>
+      <tbody>
       {% for error in errors %}
         <tr>
           <td>{{ error.description }}</td>
           <td><a href="http://capi.stat.kg/Interview/Review/{{ error.interviewId }}" target="_blank" class="btn btn-primary">Просмотреть интервью</a></td>
         </tr>
       {% endfor %}
-    </tbody>
-  </table>
+      </tbody>
+    </table>
+  {% else %}
+    <p><b><i>Ошибок нет.</i></b></p>
+  {% endif %}
+
+  {% if totalPages > 1 %}
+    <p>Страница {{ currentPage }} из {{ totalPages }}</p>
+    <ul class="pagination">
+      <li class="page-item{{ currentPage == 1 ? ' disabled' }}">
+        <a href="{{ path('questionnaire.errors', {page: 1, id: id}) }}" class="page-link" aria-label="В начало">
+          <span aria-hidden="true">В начало</span>
+          <span class="sr-only">В начало</span>
+        </a>
+      </li>
+
+      {% if currentPage > 1 %}
+        <li class="page-item disabled">
+          <a href="#" class="page-link">...</a>
+        </li>
+      {% endif %}
+
+      <li class="page-item{{ currentPage == 1 ? ' disabled' }}">
+        <a class="page-link" href="{{ path('questionnaire.errors', {page: currentPage-1 < 1 ? 1 : currentPage-1, id: id}) }}"
+           aria-label="Назад">
+          <span aria-hidden="true">&laquo;</span>
+          <span class="sr-only">На предыдующую</span>
+        </a>
+      </li>
+
+      <li class="page-item active disabled">
+        <a href="#" class="page-link" aria-label="Текущая страница">
+          {{ currentPage }}
+        </a>
+      </li>
+
+      <li class="page-item{{ currentPage == totalPages ? ' disabled' }}">
+        <a class="page-link" href="{{ path('questionnaire.errors', {page: currentPage+1 <= totalPages ? currentPage+1 : currentPage, id: id}) }}">
+          <span aria-hidden="true">&raquo;</span>
+          <span class="sr-only">Вперед</span>
+        </a>
+      </li>
+
+      {% if currentPage != totalPages %}
+        <li class="page-item disabled">
+          <a href="#" class="page-link">...</a>
+        </li>
+      {% endif %}
+
+      <li class="page-item{{ currentPage == totalPages ? ' disabled' }}">
+        <a href="{{ path('questionnaire.errors', {page: totalPages, id: id}) }}" class="page-link" aria-label="В конец">
+          <span aria-hidden="true">В конец</span>
+          <pan class="sr-only">В конец</pan>
+        </a>
+      </li>
+    </ul>
+    <div class="go-to-page-block">
+      <span class="go-to-page-label">На страницу </span>
+      <input type="text" class="form-control" name="page" id="page-value" style="width:50px !important;float: left;"> <span class="btn btn-link">из {{ totalPages }}</span>
+      <button class="btn btn-primary" data-id="{{ id }}" id="go-to-page-btn">Перейти</button>
+      <div class="clearfix"></div>
+    </div>
+  {% endif %}
 </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+  <script>
+      goToPage();
+  </script>
 {% endblock %}

@@ -29,14 +29,19 @@ class QuestionnaireController extends AbstractController
     }
 
     /**
-     * @Route("/questionnaire/{id}/errors", name="questionnaire.errors")
+     * @Route("/questionnaire/{id}/errors/{page}", name="questionnaire.errors")
      */
-    public function validationErrors(ValidationErrorRepository $errorRepository, $id)
+    public function validationErrors(ValidationErrorRepository $errorRepository, $id, $page = 1)
     {
-        $errors = $errorRepository->getAllByQuestionnaireId($id);
+        $limit = 10;
+        $errors = $errorRepository->getAllByQuestionnaireId($id, $page, $limit);
+        $totalPages = ceil($errors->count() / $limit);
 
         return $this->render('questionnaire/check_errors.html.twig', [
-            'errors' => $errors
+            'errors' => $errors,
+            'totalPages' => $totalPages,
+            'currentPage' => $page,
+            'id' => $id
         ]);
     }
 }

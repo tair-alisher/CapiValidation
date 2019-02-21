@@ -42,16 +42,16 @@ class Interview
     /**
      * Field for mapping query results
      *
-     * type is string associative string array [question => answer]
+     * type array of QuestionData objects
      */
-    private $questionsAndAnswers;
+    private $questionsData;
 
     /**
      * Interview constructor.
      */
     public function __construct()
     {
-        $this->questionsAndAnswers = array();
+        $this->questionsData = array();
     }
 
     /**
@@ -135,27 +135,27 @@ class Interview
     }
 
     /**
-     * Get $questionsAndAnswers
+     * Get $questionData
      *
      * @return array
      */
-    public function getQuestionsAndAnswers()
+    public function getQuestionsData()
     {
-        return $this->questionsAndAnswers;
+        return $this->questionsData;
     }
 
-    public function pushToQuestionsAndAnswers(array $questionAndAnswer)
+    public function pushToQuestionsData(object $questionData)
     {
-        array_push($this->questionsAndAnswers, $questionAndAnswer);
+        array_push($this->questionsData, $questionData);
     }
 
     /**
-     * Set $questionsAndAnswers
+     * Set $questionsData
      *
      * @param array
      */
-    public function setQuestionsAndAnswers(array $questionAndAnswer)
+    public function setQuestionsData(array $questionsData)
     {
-        $this->questionsAndAsnwers = $questionAndAnswer;
+        $this->questionsData = $questionsData;
     }
 }

@@ -246,6 +246,16 @@ class Validation
     }
 
     /**
+     * Returns name of answer indicator
+     *
+     * @return null|string
+     */
+    public function getAnswerIndicatorName(): ?string
+    {
+        return $this->getAnswerIndicator()->getName();
+    }
+
+    /**
      * Get $comparedValues
      *
      * @return Collection|CompareValue[]
