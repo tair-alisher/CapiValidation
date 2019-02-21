@@ -8,15 +8,12 @@ use App\Service\Validator;
 use App\Entity\Main\Validation;
 use App\Form\CreateValidationType;
 use App\Repository\Main\ValidationRepository;
-use App\Repository\Main\InputValueTypeRepository;
+use App\Repository\Remote\InterviewRepository;
 use App\Repository\Remote\QuestionnaireRepository as QuestRepo;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-
-
-use App\Repository\Remote\InterviewRepository;
 
 class ValidationController extends AbstractController
 {
@@ -73,9 +70,9 @@ class ValidationController extends AbstractController
         try {
             $validator->createValidation($_validation);
             $response['success'] = true;
-            $response['message'] = 'Validation created successfuly.';
+            $response['message'] = 'Validation created successfully.';
         } catch (\Exception $e) {
-            $response['message'] = 'ошибка: ' . $e->getMessage();
+            $response['message'] = 'ошибка: ' . $e->getMessage() . '. File: ' . $e->getFile() . '. Line: ' . $e->getLine();
         }
 
         return new JsonResponse($response);
@@ -158,7 +155,7 @@ class ValidationController extends AbstractController
     }
 
     /**
-     * @Route("/validate", name="validate", methods={"GET", "POST"})
+     * @Route("/validate", name="validate", methods="GET")
      */
     public function validate(Request $request, QuestRepo $questionnaireRepo, Validator $validator)
     {
@@ -166,27 +163,34 @@ class ValidationController extends AbstractController
             'questionnaire_repository' => $questionnaireRepo
         ]);
 
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
-            $questionnaireId = $form["questionnaire"]->getData();
-            $quarter = $form["quarter"]->getData();
-            $month = $form["month"]->getData();
-            $area = $form["area"]->getData();
-
-            if ($validator->validate($questionnaireId, $month)) {
-                return $this->redirectToRoute('questionnaire.errors', ['id' => $questionnaireId]);
-            }
-//
-//            $expression = $validator->validate($questionnaireId, $month);
-//
-//            return $this->render('validation/expression.html.twig', [
-//                'expression' => $expression
-//            ]);
-        }
-
         return $this->render('validation/validate.html.twig', [
             'form' => $form->createView()
         ]);
+    }
+
+    /**
+     * @Route("/validate/start", name="validate.start", methods="POST")
+     */
+    public function startValidate(Request $request, Validator $validator, InterviewRepository $inRepo)
+    {
+        $content = $request->getContent();
+        $data = json_decode($content);
+
+        $response = array(
+            'completed' => false,
+            'allRowsCount' => 0
+        );
+
+        $questionnaireId = $data->questionnaireId;
+        $month = $data->month;
+
+        if ($validator->validate($questionnaireId, $month, $data->offset, $data->deleteCurrentErrors)) {
+            $response['completed'] = true;
+            return new JsonResponse($response);
+        }
+
+        $response['allRowsCount'] = $inRepo->getAllRowsCountByQuestionnaireIdAndMonth($questionnaireId, $month);
+
+        return new JsonResponse($response);
     }
 }

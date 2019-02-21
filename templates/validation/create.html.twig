@@ -49,7 +49,8 @@
         </div>
       </div>
     </div>
-    <button type="button" class="btn btn-primary" onclick="addComparedValue()">+ добавить</button>
+    <button type="button" class="btn btn-primary float-right" onclick="addComparedValue()">+ добавить</button>
+    <div class="clearfix"></div>
 
     <hr>
     <i><b>Зависит от ответа (необязательно)</b></i>
@@ -68,6 +69,15 @@
       </div>
     </div>
 
+    <div class="row" id="in-same-section-block">
+      <div class="col-md-12 col-sm-12">
+        <div class="form-group">
+          <i><b>{{ form_label(form.inSameSection) }}</b></i>
+          {{ form_widget(form.inSameSection) }}
+        </div>
+      </div>
+    </div>
+
     <hr>
     <div id="questionnaires">
       <div class="row">
@@ -81,11 +91,12 @@
     </div>
 
     <div class="form-group">
-      <button type="button" class="btn btn-primary" onclick="addQuestionnaire()">+ добавить</button>
+      <button type="button" class="btn btn-primary float-right" onclick="addQuestionnaire()">+ добавить</button>
     </div>
+  <div class="clearfix"></div>
 
     <div class="form-group">
-      <input type="submit" class="btn btn-primary" value="Сохранить" id="create-validation-btn">
+      <input type="submit" class="btn btn-success" value="Сохранить" id="create-validation-btn">
     </div>
   {{ form_end(form) }}
 </div>
@@ -94,6 +105,7 @@
 {% block javascripts %}
   {{ parent() }}
   <script>
+    doNotSaveOnEnter();
     saveValidation();
   </script>
 {% endblock %}

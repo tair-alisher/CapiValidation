@@ -25,25 +25,21 @@ class ValidateType extends AbstractType
                 'choices' => $questionnaires,
                 'label' => 'Форма'
             ])
-            ->add('quarter', NumberType::class, [
-                'required' => false,
-                'label' => 'Квартал',
-                'attr' => ['placeholder' => 'квартал']
-            ])
+//            ->add('quarter', NumberType::class, [
+//                'required' => false,
+//                'label' => 'Квартал',
+//                'attr' => ['placeholder' => 'квартал']
+//            ])
             ->add('month', NumberType::class, [
                 'required' => false,
                 'label' => 'Месяц',
                 'attr' => ['placeholder' => 'месяц']
-            ])
-            ->add('area', TextType::class, [
-                'required' => false,
-                'label' => 'Область',
-                'attr' => ['placeholder' => 'область']
-            ])
-            ->add('validate', SubmitType::class, [
-                'label' => 'Запустить',
-                'attr' => ['class' => 'btn-primary pull-right']
             ]);
+//            ->add('area', TextType::class, [
+//                'required' => false,
+//                'label' => 'Область',
+//                'attr' => ['placeholder' => 'область']
+//            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver)

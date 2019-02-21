@@ -5,9 +5,19 @@
 {% block body %}
 <h4>Запуск валидаций</h4>
 <hr>
-<div class="wrapper">
+<div class="wrapper" id="validate-block">
   {{ form_start(form) }}
     {{ form_widget(form) }}
+    <div class="form-group">
+      <button class="btn btn-primary" type="button" onclick="startValidate()">Запуск</button>
+    </div>
   {{ form_end(form) }}
 </div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script>
+    doNotSaveOnEnter();
+  </script>
 {% endblock %}

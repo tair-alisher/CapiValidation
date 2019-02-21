@@ -71,6 +71,7 @@ function saveValidation() {
         validation.relatedAnswer.compareOperatorId = $('#create_validation_relAnswerCompareOperator').val();
         validation.relatedAnswer.value = $('#create_validation_relAnswerValue').val();
         validation.relatedAnswer.typeId = $('#create_validation_relAnswerType').val();
+        validation.relatedAnswer.inSameSection = $('#create_validation_inSameSection').checked ? 1 : 0;
       } else {
         validation.relatedAnswer = null;
       }
@@ -92,13 +93,13 @@ function saveValidation() {
         data: JSON.stringify(validation),
 
         success: function (response) {
-          var parsedResponse = JSON.parse(response);
-          if (parsedResponse.success) {
+          response = JSON.parse(response);
+          if (response.success) {
             window.location.href = '/validation';
             alert('Валидация создана успешно.');
           } else {
             alert('Произошла ошибка. Попробуйте еще раз.');
-            console.log(parsedResponse.message);
+            console.log(response.message);
           }
         },
         error: function (xhr) {
@@ -147,4 +148,60 @@ function goToPage() {
             window.location.href='/questionnaire/' + questionnaireId + '/errors/' + page;
         })
     })
+}
+
+function startValidate(deleteCurrentErrors = true, offset = 0) {
+    let questionnaireId = $('#validate_questionnaire').val();
+    let month = $('#validate_month').val();
+    let data = {
+        'questionnaireId': questionnaireId,
+        'month': month,
+        'offset': offset,
+        'deleteCurrentErrors': deleteCurrentErrors
+    };
+
+    let progressIndicator = $('#progress-indicator');
+    if (!progressIndicator.length) {
+        let alertBlock = document.createElement('div');
+        alertBlock.className = 'alert alert-primary';
+        alertBlock.id = 'progress-indicator';
+        alertBlock.setAttribute('role', 'alert');
+        alertBlock.appendChild(document.createTextNode('Прогресс (%): 0/100'));
+
+        $('#validate-block').prepend(alertBlock);
+    }
+
+    $.ajax({
+        url: '/validate/start',
+        type: 'POST',
+        data: JSON.stringify(data),
+
+        success: function (response) {
+            if (response.completed) {
+                window.location.href='/questionnaire/' + questionnaireId + '/errors';
+            } else {
+                let allRowsCount = response.allRowsCount;
+                let checkedRowsPercent = (offset * 100) / allRowsCount;
+                $('#progress-indicator').text('Прогресс (%): ' + Math.round(checkedRowsPercent) + '/100');
+
+                startValidate(false, offset += 1000);
+            }
+        },
+
+        error: function (xhr) {
+            alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+function doNotSaveOnEnter() {
+    $(document).ready(function() {
+        $(window).keydown(function (e) {
+            if (e.keyCode == 13) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    });
 }
