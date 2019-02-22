@@ -53,6 +53,21 @@ class ValidationRepository extends ServiceEntityRepository
         return $validations;
     }
 
+    public function getQuestionValidationsByQuestionnaireId($questionCode, $questionnaireId): array
+    {
+        $validations = $this->getEntityManager()->createQueryBuilder()
+            ->select('validation')
+            ->from('App\Entity\Main\Validation', 'validation')
+            ->innerJoin('validation.questionnaireValidations', 'qv')
+            ->where('qv.questionnaireId = :questionnaireId')
+            ->andWhere('validation.answerCode = :code')
+            ->setParameters(['questionnaireId' => $questionnaireId, 'code' => $questionCode])
+            ->getQuery()
+            ->getResult();
+
+        return $validations;
+    }
+
     /**
      * Removes comparedValue rows by validationId
      *

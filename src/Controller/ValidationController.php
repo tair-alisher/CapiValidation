@@ -86,9 +86,12 @@ class ValidationController extends AbstractController
         $logicOperators = $getter->getLogicOperators();
         $comparedValueTypes = $getter->getComparedValueTypes();
 
+        $comparedValueBlockId = 'compared-value-' . time();
+
         return $this->render('validation/compared_value.html.twig', [
             'logic_operators' => $logicOperators,
-            'compared_value_types' => $comparedValueTypes
+            'compared_value_types' => $comparedValueTypes,
+            'compared_value_block_id' => $comparedValueBlockId
         ]);
     }
 
@@ -99,8 +102,11 @@ class ValidationController extends AbstractController
     {
         $questionnaires = $questRepo->getTitleIdArray();
 
+        $questionnaireBlockId = 'questionnaire-' . time();
+
         return $this->render('validation/questionnaire.html.twig', [
-            'questionnaires' => $questionnaires
+            'questionnaires' => $questionnaires,
+            'questionnaire_block_id' => $questionnaireBlockId
         ]);
     }
 

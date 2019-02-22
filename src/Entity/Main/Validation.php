@@ -356,7 +356,7 @@ class Validation
      */
     public function setRelAnswerValue(string $relAnswerValue)
     {
-        $this->relAsnwerValue = $relAnswerValue;
+        $this->relAnswerValue = $relAnswerValue;
     }
 
     /**

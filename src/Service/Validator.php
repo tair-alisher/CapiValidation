@@ -23,7 +23,7 @@ class Validator
     private $errorRepo;
     private $getter;
 
-    private $validations;
+    private $questionnaireId;
     private $interview;
     private $questionsData;
     private $section;
@@ -143,7 +143,7 @@ class Validator
      * @param string
      * @param int
      */
-    public function validate($questionnaireId, $month, $offset, $deleteCurrentErrors)
+    public function validate($questionnaireId, $month, $offset, bool $deleteCurrentErrors)
     {
         $completed = false;
 
@@ -151,7 +151,7 @@ class Validator
             $this->deleteCurrentQuestionnaireValidationErrors($questionnaireId);
         }
 
-        $this->validations = $this->validationRepo->getValidationsByQuestionnaireId($questionnaireId);
+        $this->questionnaireId = $questionnaireId;
         $interviews = $this->interviewRepo->getInterviewsByQuestionnaireIdAndMonth($questionnaireId, $month, $offset, $limit = 1000);
         if (count($interviews) <= 0) {
             $completed = true;
@@ -197,23 +197,10 @@ class Validator
             $this->section = $questionData->getSectionId();
             $this->question = $questionData->getQuestionCode();
             $this->answer = $questionData->getAnswer();
-            $questionValidations = $this->selectValidationsByQuestionCode($this->question);
+            $questionValidations = $this->validationRepo->getQuestionValidationsByQuestionnaireId($this->question, $this->questionnaireId);
 
             $this->checkQuestionValidations($questionValidations);
         }
-    }
-
-    /**
-     * Returns question validations from all validation list
-     *
-     * @param string $questionCode
-     * @return array
-     */
-    private function selectValidationsByQuestionCode(string $questionCode)
-    {
-        return array_filter($this->validations, function ($_validation) use ($questionCode) {
-            return $_validation->getAnswerCode() == $questionCode;
-        });
     }
 
     /**
@@ -242,8 +229,6 @@ class Validator
 
         if ($validation->getRelAnswerCode() != null) {
             $expression = $this->buildRelatedAnswerExpression($validation);
-            var_dump('$isValid = ' . $expression);
-            throw new \Exception('stop');
             eval('$isValid = ' . $expression);
         }
 

@@ -1,28 +1,32 @@
-<div class="row compared-value">
-  <div class="col-md-4">
-    <div class="form-group">
-      <label for="" class="required">Логический оператор</label>
-      <select name="create_validation[compareOpeartor]" class="compared-value-operator-id form-control">
-      {% for operator in logic_operators|keys %}
-        <option value="{{ logic_operators[operator] }}">{{ operator }}</option>
-      {% endfor %}
-      </select>
+<div id="{{ compared_value_block_id }}">
+  <div class="row compared-value">
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="" class="required">Логический оператор</label>
+        <select name="create_validation[compareOpeartor]" class="compared-value-operator-id form-control">
+          {% for operator in logic_operators|keys %}
+            <option value="{{ logic_operators[operator] }}">{{ operator }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="" class="required">Значение</label>
+        <input type="text" class="compared-value-input form-control" name="create_validation[comparedValues]" required="required" placeholder="пример: 10">
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="" class="required">Тип</label>
+        <select name="create_validation_comparedValueTypes" class="compared-value-type-id form-control">
+          {% for type in compared_value_types|keys %}
+            <option value="{{ compared_value_types[type] }}">{{ type }}</option>
+          {% endfor %}
+        </select>
+      </div>
     </div>
   </div>
-  <div class="col-md-4">
-    <div class="form-group">
-      <label for="" class="required">Значение</label>
-      <input type="text" class="compared-value-input form-control" name="create_validation[comparedValues]" required="required" placeholder="пример: 10">
-    </div>
-  </div>
-  <div class="col-md-4">
-    <div class="form-group">
-      <label for="" class="required">Тип</label>
-      <select name="create_validation_comparedValueTypes" class="compared-value-type-id form-control">
-        {% for type in compared_value_types|keys %}
-          <option value="{{ compared_value_types[type] }}">{{ type }}</option>
-        {% endfor %}
-      </select>
-    </div>
-  </div>
+  <button class="btn btn-danger float-right" type="button" onclick="removeDivById('{{ compared_value_block_id }}')"><span class="oi oi-x"></span> Убрать</button>
+  <div class="clearfix"></div>
 </div>

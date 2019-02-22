@@ -40,8 +40,20 @@ function saveValidation() {
       var validation = {};
       // проверяемый ответ
       validation.title = $('#create_validation_title').val();
+
+      if (validation.title.length <= 0) {
+        alert('Заполните наименование контроля.');
+        return false;
+      }
+
       validation.answer = {};
       validation.answer.code = $('#create_validation_answerCode').val();
+
+      if (validation.answer.code.length <= 0) {
+        alert('Укажите код проверяемого ответа.');
+        return false;
+      }
+
       validation.answer.typeId = $('#create_validation_answerType').val();
       validation.answer.indicatorId = $('#create_validation_answerIndicator').val();
       // сравниваемые значения
@@ -71,7 +83,7 @@ function saveValidation() {
         validation.relatedAnswer.compareOperatorId = $('#create_validation_relAnswerCompareOperator').val();
         validation.relatedAnswer.value = $('#create_validation_relAnswerValue').val();
         validation.relatedAnswer.typeId = $('#create_validation_relAnswerType').val();
-        validation.relatedAnswer.inSameSection = $('#create_validation_inSameSection').checked ? 1 : 0;
+        validation.relatedAnswer.inSameSection = document.getElementById('create_validation_inSameSection').checked;
       } else {
         validation.relatedAnswer = null;
       }
@@ -98,6 +110,7 @@ function saveValidation() {
             window.location.href = '/validation';
             alert('Валидация создана успешно.');
           } else {
+            console.log(response);
             alert('Произошла ошибка. Попробуйте еще раз.');
             console.log(response.message);
           }
@@ -204,4 +217,8 @@ function doNotSaveOnEnter() {
             }
         });
     });
+}
+
+function removeDivById(id) {
+  $('#' + id).remove();
 }
