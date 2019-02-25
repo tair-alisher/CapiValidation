@@ -1,31 +1,52 @@
 function addComparedValue() {
+  showProcessingModal();
+
   $.ajax({
     url: '/validation/add-compared-value',
     type: 'POST',
-    async: true,
+    // async: true,
 
     success: function (data) {
+      hideProcessingModal();
       $('#compared-values').append(data);
+
     },
     error: function(xhr) {
-      alert('Ajax request failed.');
+      hideProcessingModal();
+      alert('Произошла ошибка.');
       console.log(xhr.responseText);
     }
   });
   return false;
 }
 
+function showProcessingModal() {
+  $('#processingModal').modal({
+    'show': true,
+    'keyboard': false,
+    'backdrop': 'static'
+  });
+}
+
+function hideProcessingModal() {
+  $('#processingModal').modal('hide');
+}
+
 function addQuestionnaire() {
+  showProcessingModal();
+
   $.ajax({
     url: '/validation/add-questionnaire',
     type: 'POST',
-    async: true,
+    // async: true,
 
     success: function (data) {
+      hideProcessingModal();
       $('#questionnaires').append(data);
     },
     error: function (xhr) {
-      alert('Ajax request failed.');
+      hideProcessingModal();
+      alert('Произошла ошибка.');
       console.log(xhr.responseText);
     }
   });
@@ -64,15 +85,17 @@ function saveValidation() {
       validation.comparedValues.values.push({
         logicOperatorId: null,
         value: $('#create_validation_comparedValue').val(),
-        typeId: $('#create_validation_comparedValueType').val()
+        typeId: $('#create_validation_comparedValueType').val(),
+        inSameSection: $('#create_validation_comparedValueInSameSection').is(':checked')
       });
 
       var _comparedValues = $('.compared-value');
       for (var i = 0; i < _comparedValues.length; i++) {
         validation.comparedValues.values.push({
-          logicOperatorId: _comparedValues[i].getElementsByClassName('compared-value-operator-id')[0].value,
-          value: _comparedValues[i].getElementsByClassName('compared-value-input')[0].value,
-          typeId: _comparedValues[i].getElementsByClassName('compared-value-type-id')[0].value
+          logicOperatorId: $(_comparedValues[i]).find('select.compared-value-operator-id').first().val(),
+          value: $(_comparedValues[i]).find('input.compared-value-input').first().val(),
+          typeId: $(_comparedValues[i]).find('select.compared-value-type-id').first().val(),
+          inSameSection: $(_comparedValues[i]).find('input.cv-in-same-section:checked').first().is(':checked')
         });
       }
       // связный ответ
@@ -83,7 +106,7 @@ function saveValidation() {
         validation.relatedAnswer.compareOperatorId = $('#create_validation_relAnswerCompareOperator').val();
         validation.relatedAnswer.value = $('#create_validation_relAnswerValue').val();
         validation.relatedAnswer.typeId = $('#create_validation_relAnswerType').val();
-        validation.relatedAnswer.inSameSection = document.getElementById('create_validation_inSameSection').checked;
+        validation.relatedAnswer.inSameSection = $('#create_validation_inSameSection').is(':checked');
       } else {
         validation.relatedAnswer = null;
       }
@@ -110,7 +133,6 @@ function saveValidation() {
             window.location.href = '/validation';
             alert('Валидация создана успешно.');
           } else {
-            console.log(response);
             alert('Произошла ошибка. Попробуйте еще раз.');
             console.log(response.message);
           }
@@ -127,27 +149,30 @@ function saveValidation() {
 function handleRemoveValidationBtnClick() {
     $(document).ready(function () {
         $('.remove-validation').click(function () {
-            var validationId = $(this).data('id');
+            let confirmed = confirm('Вы уверены, что хотите удалить контроль?');
+            if (confirmed) {
+              let validationId = $(this).data('id');
 
-            $.ajax({
+              $.ajax({
                 url: '/validation/delete',
                 type: 'POST',
                 data: { 'id': validationId },
 
                 success: function (response) {
-                    if (response.success) {
-                        $('#validation-' + validationId).remove();
-                        alert('Контроль успешно удален.');
-                    } else {
-                        alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
-                        console.log(response.message);
-                    }
+                  if (response.success) {
+                    $('#validation-' + validationId).remove();
+                    alert('Контроль успешно удален.');
+                  } else {
+                    alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+                    console.log(response.message);
+                  }
                 },
                 error: function (xhr) {
-                    alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
-                    console.log(xhr.responseText);
+                  alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+                  console.log(xhr.responseText);
                 }
-            });
+              });
+            }
         });
     });
 }
@@ -155,8 +180,8 @@ function handleRemoveValidationBtnClick() {
 function goToPage() {
     $(document).ready(function () {
         $('#go-to-page-btn').click(function () {
-            var page = $('#page-value').val();
-            var questionnaireId = $(this).data('id');
+            let page = $('#page-value').val();
+            let questionnaireId = $(this).data('id');
 
             window.location.href='/questionnaire/' + questionnaireId + '/errors/' + page;
         })

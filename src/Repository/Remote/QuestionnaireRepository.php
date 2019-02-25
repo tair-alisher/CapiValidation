@@ -55,4 +55,13 @@ class QuestionnaireRepository extends ServiceEntityRepository
 
         return $titleIdArray;
     }
+
+    public function getQuestionnairesByIds($questionnairesId)
+    {
+        return $this->createQueryBuilder('q')
+            ->where('q.id IN (:ids)')
+            ->setParameter('ids', $questionnairesId)
+            ->getQuery()
+            ->getResult();
+    }
 }

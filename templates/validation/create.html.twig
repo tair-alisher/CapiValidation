@@ -48,6 +48,11 @@
           {{ form_row(form.comparedValueType) }}
         </div>
       </div>
+     <div class="row">
+       <div class="col-md-12 col-sm-12">
+         {{ form_row(form.comparedValueInSameSection) }}
+       </div>
+     </div>
     </div>
     <button type="button" class="btn btn-primary float-right my-add-btn" onclick="addComparedValue()">
       <span class="oi oi-plus"></span> Добавить</button>
@@ -101,6 +106,7 @@
     </div>
   {{ form_end(form) }}
 </div>
+{% include 'validation/processing.html' %}
 {% endblock %}
 
 {% block javascripts %}

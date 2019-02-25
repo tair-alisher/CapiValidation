@@ -6,6 +6,7 @@ use App\Entity\Main\Validation;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use App\Entity\Remote\Questionnaire;
 
 /**
  * ValidationRepository
@@ -96,5 +97,22 @@ class ValidationRepository extends ServiceEntityRepository
         $statement = $em->getConnection()->prepare($query);
         $statement->bindValue('validation_id', $id);
         $statement->execute();
+    }
+
+    public function getQuestionnairesIdForValidation($validationId)
+    {
+        $questionnairesId = $this->getEntityManager()->createQueryBuilder()
+            ->select('qv.questionnaireId')
+            ->from('App\Entity\Main\QuestionnaireValidation', 'qv')
+            ->where('qv.validationId = :validationId')
+            ->setParameter('validationId', $validationId)
+            ->getQuery()
+            ->getResult(\Doctrine\ORM\Query::HYDRATE_ARRAY);
+        $ids = array();
+        foreach ($questionnairesId as $row) {
+            array_push($ids, $row['questionnaireId']);
+        }
+
+        return $ids;
     }
 }

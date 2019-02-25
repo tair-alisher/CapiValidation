@@ -33,7 +33,7 @@ class CreateValidationType extends AbstractType
             // проверяемый ответ
             ->add('answerCode', TextType::class, [
                 'required' => true,
-                'label' => 'Код ответа',
+                'label' => 'Код вопроса',
                 'attr' => ['placeholder' => 'пример: hhCode']
             ])
             ->add('answerType', ChoiceType::class, [
@@ -57,9 +57,14 @@ class CreateValidationType extends AbstractType
                 'choices' => $comparedValueTypes,
                 'label' => 'Тип'
             ])
+            ->add('comparedValueInSameSection', CheckboxType::class, [
+                'label' => 'Находится в той же секции, что и проверяемый ответ?',
+                'required' => false,
+                'value' => 1
+            ])
             // связынй ответ
             ->add('relAnswerCode', TextType::class, [
-                'label' => 'Код ответа',
+                'label' => 'Код вопроса',
                 'required' => false,
                 'attr' => ['placeholder' => 'пример: resultB']
             ])
@@ -79,7 +84,7 @@ class CreateValidationType extends AbstractType
             ->add('inSameSection', CheckboxType::class, [
                 'label' => 'Связный ответ находится в той же секции, что и проверяемый ответ?',
                 'required' => false,
-                'value' => 0
+                'value' => 1
             ])
             // опросник
             ->add('questionnaireId', ChoiceType::class, [

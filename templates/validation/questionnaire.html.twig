@@ -3,14 +3,20 @@
     <div class="col-md-12 col-sm-12">
       <div class="form-group">
         <i><b><label for="" class="required">Опросник*</label></b></i>
-        <select name="create_validation[questionnaireId]" id="create_validation_questionnaireId" class="questionnaire-id form-control">
-          {% for item in questionnaires|keys %}
-            <option value="{{ questionnaires[item] }}">{{ item }}</option>
-          {% endfor %}
-        </select>
+        <div class="row">
+          <div class="col-md-10 col-sm-10">
+            <select name="create_validation[questionnaireId]" id="create_validation_questionnaireId" class="questionnaire-id form-control">
+              {% for item in questionnaires|keys %}
+                <option value="{{ questionnaires[item] }}">{{ item }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-2 col-sm-2">
+            <button class="btn btn-danger float-right" type="button" onclick="removeDivById('{{ questionnaire_block_id }}')"><span class="oi oi-x"></span> Убрать</button>
+            <div class="clearfix"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-  <button class="btn btn-danger float-right" type="button" onclick="removeDivById('{{ questionnaire_block_id }}')"><span class="oi oi-x"></span> Убрать</button>
-  <div class="clearfix"></div>
 </div>

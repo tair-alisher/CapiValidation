@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\Remote\QuestionnaireRepository;
 use App\Service\Getter;
 use App\Form\ValidateType;
 use App\Service\Validator;
@@ -34,15 +35,27 @@ class ValidationController extends AbstractController
     }
 
     /**
+     * @Route("/validation/{id}/details", name="validation.details", methods="GET")
+     */
+    public function details($id, ValidationRepository $validRepo, QuestRepo $questRepo)
+    {
+        $validation = $validRepo->find($id);
+
+        $questionnairesId = $validRepo->getQuestionnairesIdForValidation($id);
+        $belongsToQuestionnaires = $questRepo->getQuestionnairesByIds($questionnairesId);
+
+
+        return $this->render('validation/details.html.twig', [
+            'validation' => $validation,
+            'questionnaires' => $belongsToQuestionnaires
+        ]);
+    }
+
+    /**
      * @Route("/validation/create", name="validation.create_form", methods="GET")
      */
-    public function create_form(
-        Request $request,
-        QuestRepo $questionnaireRepo,
-        Getter $getter,
-        Validator $validator)
+    public function create_form(QuestRepo $questionnaireRepo,Getter $getter)
     {
-        $validation = new Validation();
         $form = $this->createForm(CreateValidationType::class, null, [
             'action' => $this->generateUrl('validation.create'),
             'getter' => $getter,
@@ -57,7 +70,7 @@ class ValidationController extends AbstractController
     /**
      * @Route("/validation/create", name="validation.create", methods="POST")
      */
-    public function create(Request $request, QuestRepo $questRepo, Validator $validator)
+    public function create(Request $request, Validator $validator)
     {
         $content = $request->getContent();
         $_validation = json_decode($content);
@@ -163,7 +176,7 @@ class ValidationController extends AbstractController
     /**
      * @Route("/validate", name="validate", methods="GET")
      */
-    public function validate(Request $request, QuestRepo $questionnaireRepo, Validator $validator)
+    public function validate(QuestRepo $questionnaireRepo)
     {
         $form = $this->createForm(ValidateType::class, null, [
             'questionnaire_repository' => $questionnaireRepo

@@ -111,6 +111,7 @@ class Validator
             if ($value->logicOperatorId != null) {
                 $comparedValue->setLogicOperator($this->getter->logicOperatorRepo()->find($value->logicOperatorId));
             }
+            $comparedValue->setInSameSection($value->inSameSection);
 
             $this->em->persist($comparedValue);
         }
@@ -429,7 +430,11 @@ class Validator
                 $result = " ({$answer} {$compareOperator} {$comparedValue}";
                 break;
             case 'indicator':
-                $comparedValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId(), $comparedValue);
+                if ($comparedValueObj->getInSameSection()) {
+                    $comparedValue = $this->interviewRepo->getQuestionAnswerInSection($this->interview->getInterviewId(), $comparedValue, $this->section);
+                } else {
+                    $comparedValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId(), $comparedValue);
+                }
                 $result = " ({$answer} {$compareOperator} {$comparedValue}";
                 break;
             default:
@@ -525,7 +530,12 @@ class Validator
                 $expression .= " {$logicOperator} ({$answer} {$compareOperator} {$comparedValue})";
                 break;
             case 'indicator':
-                $comparedValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId(), $comparedValue);
+                if ($nextComparedValue->getInSameSection()) {
+                    $comparedValue = $this->interviewRepo->getQuestionAnswerInSection($this->interview->getInterviewId(), $comparedValue, $this->section);
+                } else {
+                    $comparedValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId(), $comparedValue);
+                }
+
                 if ($logicOperator == 'sum') {
                     $expression .= " + {$comparedValue}";
                 } else {

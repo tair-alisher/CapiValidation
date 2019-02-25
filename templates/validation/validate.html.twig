@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Валидация{% endblock %}
+{% block title %}Запуск валидаций{% endblock %}
 
 {% block body %}
 <h4>Запуск валидаций</h4>
@@ -9,7 +9,7 @@
   {{ form_start(form) }}
     {{ form_widget(form) }}
     <div class="form-group">
-      <button class="btn btn-primary" type="button" onclick="startValidate()">Запуск</button>
+      <button class="btn btn-success float-right" type="button" onclick="startValidate()"><span class="oi oi-media-play"></span> Запуск</button>
     </div>
   {{ form_end(form) }}
 </div>
