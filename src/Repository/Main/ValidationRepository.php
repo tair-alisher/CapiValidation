@@ -6,6 +6,7 @@ use App\Entity\Main\Validation;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use App\Entity\Remote\Questionnaire;
 
 /**
  * ValidationRepository
@@ -21,6 +22,19 @@ class ValidationRepository extends ServiceEntityRepository
     {
         $query = $this->createQueryBuilder('v')
             ->orderBy('v.title', 'ASC')
+            ->getQuery();
+
+        $paginator = $this->paginate($query, $currentPage, $limit);
+
+        return $paginator;
+    }
+
+    public function getAllWithNameByPages($name, $currentPage = 1, $limit = 10): object
+    {
+        $query = $this->createQueryBuilder('v')
+            ->where('upper(v.title) LIKE upper(:name)')
+            ->orderBy('v.title', 'ASC')
+            ->setParameter('name', '%'.$name.'%')
             ->getQuery();
 
         $paginator = $this->paginate($query, $currentPage, $limit);
@@ -47,6 +61,21 @@ class ValidationRepository extends ServiceEntityRepository
             ->innerJoin('validation.questionnaireValidations', 'qv')
             ->where('qv.questionnaireId = :questionnaireId')
             ->setParameter('questionnaireId', $questionnaireId)
+            ->getQuery()
+            ->getResult();
+
+        return $validations;
+    }
+
+    public function getQuestionValidationsByQuestionnaireId($questionCode, $questionnaireId): array
+    {
+        $validations = $this->getEntityManager()->createQueryBuilder()
+            ->select('validation')
+            ->from('App\Entity\Main\Validation', 'validation')
+            ->innerJoin('validation.questionnaireValidations', 'qv')
+            ->where('qv.questionnaireId = :questionnaireId')
+            ->andWhere('validation.answerCode = :code')
+            ->setParameters(['questionnaireId' => $questionnaireId, 'code' => $questionCode])
             ->getQuery()
             ->getResult();
 
@@ -81,5 +110,22 @@ class ValidationRepository extends ServiceEntityRepository
         $statement = $em->getConnection()->prepare($query);
         $statement->bindValue('validation_id', $id);
         $statement->execute();
+    }
+
+    public function getQuestionnairesIdForValidation($validationId)
+    {
+        $questionnairesId = $this->getEntityManager()->createQueryBuilder()
+            ->select('qv.questionnaireId')
+            ->from('App\Entity\Main\QuestionnaireValidation', 'qv')
+            ->where('qv.validationId = :validationId')
+            ->setParameter('validationId', $validationId)
+            ->getQuery()
+            ->getResult(\Doctrine\ORM\Query::HYDRATE_ARRAY);
+        $ids = array();
+        foreach ($questionnairesId as $row) {
+            array_push($ids, $row['questionnaireId']);
+        }
+
+        return $ids;
     }
 }

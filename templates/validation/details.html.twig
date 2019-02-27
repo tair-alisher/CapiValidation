@@ -1,0 +1,97 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Контроль{% endblock %}
+
+{% block body %}
+<div class="wrapper">
+  <h4>{{ validation.title }}</h4>
+  <hr>
+  <div class="answer">
+    <p><b><i>Проверяемый ответ</i></b></p>
+    <div class="row">
+      <table class="table-sm">
+        <tr>
+          <td><b>Код вопроса:</b></td>
+          <td>{{ validation.answerCode }}</td>
+        </tr>
+        <tr>
+          <td><b>Тип:</b></td>
+          <td>{{ validation.answerType.valueType.title }}</td>
+        </tr>
+        <tr>
+          <td><b>Атрибут:</b></td>
+          <td>{{ validation.answerIndicator.title }}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <hr>
+
+  <div class="related-question">
+    <p><b><i>Зависит от ответа</i></b></p>
+    <div class="row">
+      <table class="table-sm">
+        <tr>
+          <td><b>Код вопроса:</b></td>
+          <td>{{ validation.relAnswerCode }}</td>
+        </tr>
+        <tr>
+          <td><b>Оператор сравнения:</b></td>
+          <td>{{ validation.relAnswerCompareOperator.operatorValue.title }}</td>
+        </tr>
+        <tr>
+          <td><b>Значение:</b></td>
+          <td>{{ validation.relAnswerValue }}</td>
+        </tr>
+        <tr>
+          <td><b>Тип:</b></td>
+          <td>{{ validation.relAnswerType.valueType.title }}</td>
+        </tr>
+        <tr>
+          <td><b>В той же секции, что и проверяемый ответ:</b></td>
+          <td>{{ validation.inSameSection ? 'да' : 'нет' }}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <hr>
+
+  <div class="compared-values">
+    <p><b><i>Сравниваемые значения</i></b></p>
+    {% for compared_value in validation.comparedValues %}
+    <hr>
+    <div class="row">
+      <table class="table-sm">
+        <tr>
+          <td><b>Оператор сравнения:</b></td>
+          <td>{{ compared_value.compareOperator.operatorValue.title }}</td>
+        </tr>
+        <tr>
+          <td><b>Значение:</b></td>
+          <td>{{ compared_value.value }}</td>
+        </tr>
+        <tr>
+          <td><b>Тип:</b></td>
+          <td>{{ compared_value.valueType.valueType.title }}</td>
+        </tr>
+        <tr>
+          <td><b>В той же секции, что и проверяемый ответ:</b></td>
+          <td>{{ compared_value.inSameSection ? 'да' : 'нет' }}</td>
+        </tr>
+      </table>
+    </div>
+    {% endfor %}
+  </div>
+  <hr>
+
+  <div class="questionnaires">
+    <p><b><i>Относится к опросникам</i></b></p>
+    <ul>
+      {% for questionnaire in questionnaires %}
+        <li>{{ questionnaire.title }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  <a href="{{ path('validation') }}" class="btn btn-secondary">К списку контролей</a>
+</div>
+{% endblock %}

@@ -23,9 +23,10 @@ class Validator
     private $errorRepo;
     private $getter;
 
-    private $validations;
+    private $questionnaireId;
     private $interview;
-    private $questionsAndAnswers;
+    private $questionsData;
+    private $section;
     private $question;
     private $answer;
 
@@ -84,6 +85,7 @@ class Validator
             $validation->setRelAnswerValue($_validation->relatedAnswer->value);
             $validation->setRelAnswerType($this->getter->comparedValueTypeRepo()->find($_validation->relatedAnswer->typeId));
             $validation->setRelAnswerCompareOperator($this->getter->compareOperatorRepo()->find($_validation->relatedAnswer->compareOperatorId));
+            $validation->setInSameSection($_validation->relatedAnswer->inSameSection);
         }
 
         $this->em->persist($validation);
@@ -109,6 +111,7 @@ class Validator
             if ($value->logicOperatorId != null) {
                 $comparedValue->setLogicOperator($this->getter->logicOperatorRepo()->find($value->logicOperatorId));
             }
+            $comparedValue->setInSameSection($value->inSameSection);
 
             $this->em->persist($comparedValue);
         }
@@ -141,15 +144,24 @@ class Validator
      * @param string
      * @param int
      */
-    public function validate($questionnaireId, $month)
+    public function validate($questionnaireId, $month, $offset, bool $deleteCurrentErrors)
     {
-        $this->deleteCurrentQuestionnaireValidationErrors($questionnaireId);
-        $interviews = $this->interviewRepo->getInterviewsByQuestionnaireIdAndMonth($questionnaireId, $month);
-        $this->validations = $this->validationRepo->getValidationsByQuestionnaireId($questionnaireId);
+        $completed = false;
+
+        if ($deleteCurrentErrors) {
+            $this->deleteCurrentQuestionnaireValidationErrors($questionnaireId);
+        }
+
+        $this->questionnaireId = $questionnaireId;
+        $interviews = $this->interviewRepo->getInterviewsByQuestionnaireIdAndMonth($questionnaireId, $month, $offset, $limit = 1000);
+        if (count($interviews) <= 0) {
+            $completed = true;
+            return $completed;
+        }
 
         $this->checkInterviewsData($interviews);
 
-        return true;
+        return $completed;
     }
 
     /**
@@ -171,7 +183,7 @@ class Validator
     {
         foreach ($interviews as $interview) {
             $this->interview = $interview;
-            $this->questionsAndAnswers = $interview->getQuestionsAndAnswers();
+            $this->questionsData = $interview->getQuestionsData();
             $this->checkCurrentInterviewData();
             $this->em->flush();
         }
@@ -182,26 +194,14 @@ class Validator
      */
     private function checkCurrentInterviewData()
     {
-        foreach ($this->questionsAndAnswers as $key => $questionAndAnswer) {
-            $this->question = key($questionAndAnswer);
-            $this->answer = $questionAndAnswer[$this->question];
-            $questionValidations = $this->selectValidationsByQuestionCode($this->question);
+        foreach ($this->questionsData as $questionData) {
+            $this->section = $questionData->getSectionId();
+            $this->question = $questionData->getQuestionCode();
+            $this->answer = $questionData->getAnswer();
+            $questionValidations = $this->validationRepo->getQuestionValidationsByQuestionnaireId($this->question, $this->questionnaireId);
 
             $this->checkQuestionValidations($questionValidations);
         }
-    }
-
-    /**
-     * Returns question validations from all validation list
-     *
-     * @param string $questionCode
-     * @return array
-     */
-    private function selectValidationsByQuestionCode(string $questionCode)
-    {
-        return array_filter($this->validations, function ($_validation) use ($questionCode) {
-            return $_validation->getAnswerCode() == $questionCode;
-        });
     }
 
     /**
@@ -246,10 +246,12 @@ class Validator
     private function buildRelatedAnswerExpression(Validation $validation): string
     {
         $rAnswerCode = $validation->getRelAnswerCode();
-        $rQuestionAndAnswer = array_filter($this->questionsAndAnswers, function ($_qa) use ($rAnswerCode) {
-            return key($_qa) == $rAnswerCode;
-        });
-        $rAnswerValue = array_shift($rQuestionAndAnswer)[$rAnswerCode];
+        if (!$validation->getInSameSection()) {
+            $rAnswerValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId(), $rAnswerCode);
+        } else {
+            $rAnswerValue = $this->interviewRepo->getQuestionAnswerInSection($this->interview->getInterviewId(), $rAnswerCode, $this->section);
+        }
+
         $rAnswerCompareOperator = $validation->getRelAnswerCompareOperatorName();
         $rAnswerComparedValue = $validation->getRelAnswerValue();
         $rAnswerType = $validation->getRelAnswerTypeName();
@@ -278,6 +280,7 @@ class Validator
                 $result = " ({$rAnswerValue} >= {$from} && {$rAnswerValue} <= {$to}";
                 break;
             case 'null':
+                $rAnswerValue = strlen($rAnswerValue) > 0 ? $rAnswerValue : 'null';
                 $result = " ({$rAnswerValue} {$rAnswerCompareOperator} null";
                 break;
             case 'datetime':
@@ -286,10 +289,7 @@ class Validator
                 $result = " ({$rAnswerValue} {$rAnswerCompareOperator} {$rAnswerComparedValue}";
                 break;
             case 'indicator':
-                $rQuestionAndAnswer = array_filter($this->questionsAndAnswers, function ($_qa) use ($rAnswerComparedValue) {
-                    return key($_qa) == $rAnswerComparedValue;
-                });
-                $rAnswerComparedValue = array_shift($rQuestionAndAnswer)[$rAnswerComparedValue];
+                $rAnswerComparedValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId, $rAnswerComparedValue);
                 $result = "{$rAnswerValue} {$rAnswerCompareOperator} {$rAnswerComparedValue}";
                 break;
             default:
@@ -430,10 +430,11 @@ class Validator
                 $result = " ({$answer} {$compareOperator} {$comparedValue}";
                 break;
             case 'indicator':
-                $questionAndAnswer = array_filter($this->questionsAndAnswers, function ($_qa) use ($comparedValue) {
-                    return key($_qa) == $comparedValue;
-                });
-                $comparedValue = array_shift($questionAndAnswer)[$comparedValue];
+                if ($comparedValueObj->getInSameSection()) {
+                    $comparedValue = $this->interviewRepo->getQuestionAnswerInSection($this->interview->getInterviewId(), $comparedValue, $this->section);
+                } else {
+                    $comparedValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId(), $comparedValue);
+                }
                 $result = " ({$answer} {$compareOperator} {$comparedValue}";
                 break;
             default:
@@ -529,10 +530,12 @@ class Validator
                 $expression .= " {$logicOperator} ({$answer} {$compareOperator} {$comparedValue})";
                 break;
             case 'indicator':
-                $questionAndAnswer = array_filter($this->questionsAndAnswers, function ($_qa) use ($comparedValue) {
-                    return key($_qa) == $comparedValue;
-                });
-                $comparedValue = array_shift($questionAndAnswer)[$comparedValue];
+                if ($nextComparedValue->getInSameSection()) {
+                    $comparedValue = $this->interviewRepo->getQuestionAnswerInSection($this->interview->getInterviewId(), $comparedValue, $this->section);
+                } else {
+                    $comparedValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId(), $comparedValue);
+                }
+
                 if ($logicOperator == 'sum') {
                     $expression .= " + {$comparedValue}";
                 } else {

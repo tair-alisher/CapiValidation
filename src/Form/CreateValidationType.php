@@ -2,21 +2,17 @@
 
 namespace App\Form;
 
-use App\Entity\Main\Validation;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 class CreateValidationType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        /** var \App\Service\Getter $validator */
         $getter = $options['getter'];
         $inputValueTypes = $getter->getInputValueTypes();
         $compareOperators = $getter->getCompareOperators();
@@ -35,7 +31,7 @@ class CreateValidationType extends AbstractType
             // проверяемый ответ
             ->add('answerCode', TextType::class, [
                 'required' => true,
-                'label' => 'Код ответа',
+                'label' => 'Код вопроса',
                 'attr' => ['placeholder' => 'пример: hhCode']
             ])
             ->add('answerType', ChoiceType::class, [
@@ -59,9 +55,14 @@ class CreateValidationType extends AbstractType
                 'choices' => $comparedValueTypes,
                 'label' => 'Тип'
             ])
+            ->add('comparedValueInSameSection', CheckboxType::class, [
+                'label' => 'Находится в той же секции, что и проверяемый ответ?',
+                'required' => false,
+                'value' => 1
+            ])
             // связынй ответ
             ->add('relAnswerCode', TextType::class, [
-                'label' => 'Код ответа',
+                'label' => 'Код вопроса',
                 'required' => false,
                 'attr' => ['placeholder' => 'пример: resultB']
             ])
@@ -78,20 +79,17 @@ class CreateValidationType extends AbstractType
                 'choices' => $comparedValueTypes,
                 'label' => 'Тип'
             ])
+            ->add('inSameSection', CheckboxType::class, [
+                'label' => 'Связный ответ находится в той же секции, что и проверяемый ответ?',
+                'required' => false,
+                'value' => 1
+            ])
             // опросник
             ->add('questionnaireId', ChoiceType::class, [
                 'choices' => $questionnaires,
                 'label' => 'Опросник*',
                 'attr' => ['class' => 'questionnaire-id']
             ]);
-            // ->add('create', SubmitType::class, [
-            //     'label' => 'Сохранить',
-            //     'attr' => [
-            //         'class' => 'btn-success pull-right',
-            //         'onclick' => 'saveValidation()',
-            //         'id' => 'save-validation-btn'
-            //     ]
-            // ]);
     }
 
     public function configureOptions(OptionsResolver $resolver)

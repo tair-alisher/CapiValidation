@@ -3,10 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Remote\Questionnaire;
-use App\Repository\Main\ValidationErrorRepository;
+use App\Repository\Main\ValidationErrorRepository as ErrorRepo;
+use App\Repository\Remote\QuestionnaireRepository as QuestRepo;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
-use Doctrine\ORM\EntityManagerInterface;
 
 class QuestionnaireController extends AbstractController
 {
@@ -29,14 +29,21 @@ class QuestionnaireController extends AbstractController
     }
 
     /**
-     * @Route("/questionnaire/{id}/errors", name="questionnaire.errors")
+     * @Route("/questionnaire/{id}/errors/{page}", name="questionnaire.errors")
      */
-    public function validationErrors(ValidationErrorRepository $errorRepository, $id)
+    public function validationErrors($id, $page = 1, ErrorRepo $errorRepository, QuestRepo $questRepo)
     {
-        $errors = $errorRepository->getAllByQuestionnaireId($id);
+        $limit = 10;
+        $errors = $errorRepository->getAllByQuestionnaireId($id, $page, $limit);
+        $totalPages = ceil($errors->count() / $limit);
+        $questionnaireTitle = $questRepo->find($id)->getTitle();
 
         return $this->render('questionnaire/check_errors.html.twig', [
-            'errors' => $errors
+            'errors' => $errors,
+            'totalPages' => $totalPages,
+            'currentPage' => $page,
+            'id' => $id,
+            'title' => $questionnaireTitle
         ]);
     }
 }

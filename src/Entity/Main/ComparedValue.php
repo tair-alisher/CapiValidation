@@ -69,6 +69,11 @@ class ComparedValue
     private $logicOperator;
 
     /**
+     * @ORM\Column(type="boolean", name="in_same_section")
+     */
+    private $inSameSection;
+
+    /**
      * Set $id
      */
     public function __construct()
@@ -284,5 +289,15 @@ class ComparedValue
     public function getLogicOperatorName(): ?string
     {
         return $this->getLogicOperator()->getOperatorValue()->getName();
+    }
+
+    public function getInSameSection(): ?bool
+    {
+        return $this->inSameSection;
+    }
+
+    public function setInSameSection($inSameSection)
+    {
+        $this->inSameSection = $inSameSection;
     }
 }

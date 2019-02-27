@@ -1,0 +1,16 @@
+.go-to-page-label {
+    float: left;
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 1.5;
+    padding: 0.375rem 0.75rem;
+}
+
+.my-add-btn {
+    margin-top: 10px;
+}
+
+.custom-container {
+    padding-top: 10px;
+}

@@ -17,14 +17,27 @@ class ValidationErrorRepository extends ServiceEntityRepository
         parent::__construct($registry, ValidationError::class);
     }
 
-    public function getAllByQuestionnaireId($questionnaireId): array
+    public function getAllByQuestionnaireId($questionnaireId, $currentPage = 1, $limit = 10): object
     {
         $query = $this->createQueryBuilder('e')
             ->andWhere('e.questionnaireId = :questionnaire_id')
             ->setParameter('questionnaire_id', $questionnaireId)
             ->getQuery();
 
-        return $query->execute();
+        $pageEntries = $this->paginate($query, $currentPage, $limit);
+
+        return $pageEntries;
+    }
+
+    private function paginate($query, $page = 1, $limit)
+    {
+        $pgr = new Paginator($query);
+
+        $pgr->getQuery()
+            ->setFirstResult($limit * ($page - 1))
+            ->setMaxResults($limit);
+
+        return $pgr;
     }
 
     public function deleteRowsByQuestionnaireId($questionnaireId)

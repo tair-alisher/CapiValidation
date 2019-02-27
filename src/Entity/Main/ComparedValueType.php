@@ -60,7 +60,7 @@ class ComparedValueType
     /**
      * Set $valueType
      *
-     * @param App\Entity\Main\ValueType
+     * @param \App\Entity\Main\ValueType
      */
     public function setValueType(?ValueType $valueType)
     {
@@ -70,7 +70,7 @@ class ComparedValueType
     /**
      * Get $valueType
      *
-     * @return App\Entity\Main\ValueType
+     * @return \App\Entity\Main\ValueType
      */
     public function getValueType(): ?ValueType
     {
