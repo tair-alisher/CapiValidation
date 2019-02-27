@@ -22,7 +22,8 @@ CREATE TABLE "public__compared_value" (
   "c_value_type_id" uuid[not_null],
   "c_value" varchar[100][nullable],
   "c_operator_id" uuid[not_null],
-  "logic_operator" uuid[nullable]
+  "logic_operator" uuid[nullable],
+  "in_same_section" boolean[nullable]
 );
 
 CREATE TABLE "public__compared_value_type" (
@@ -61,7 +62,8 @@ CREATE TABLE "public__validation" (
   "rel_answer_code" varchar[100][nullable],
   "rel_answer_type_id" uuid[nullable],
   "rel_answer_value" varchar[100][nullable],
-  "rel_answer_compare_operator_id" uuid[nullable]
+  "rel_answer_compare_operator_id" uuid[nullable],
+  "in_same_section" boolean[nullable]
 );
 
 CREATE TABLE "public__value_type" (

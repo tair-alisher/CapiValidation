@@ -23,7 +23,7 @@ class Validator
     private $errorRepo;
     private $getter;
 
-    private $validations;
+    private $questionnaireId;
     private $interview;
     private $questionsData;
     private $section;
@@ -85,6 +85,7 @@ class Validator
             $validation->setRelAnswerValue($_validation->relatedAnswer->value);
             $validation->setRelAnswerType($this->getter->comparedValueTypeRepo()->find($_validation->relatedAnswer->typeId));
             $validation->setRelAnswerCompareOperator($this->getter->compareOperatorRepo()->find($_validation->relatedAnswer->compareOperatorId));
+            $validation->setInSameSection($_validation->relatedAnswer->inSameSection);
         }
 
         $this->em->persist($validation);
@@ -110,6 +111,7 @@ class Validator
             if ($value->logicOperatorId != null) {
                 $comparedValue->setLogicOperator($this->getter->logicOperatorRepo()->find($value->logicOperatorId));
             }
+            $comparedValue->setInSameSection($value->inSameSection);
 
             $this->em->persist($comparedValue);
         }
@@ -142,23 +144,24 @@ class Validator
      * @param string
      * @param int
      */
-    public function validate($questionnaireId, $month)
+    public function validate($questionnaireId, $month, $offset, bool $deleteCurrentErrors)
     {
-        $this->deleteCurrentQuestionnaireValidationErrors($questionnaireId);
-        $this->validations = $this->validationRepo->getValidationsByQuestionnaireId($questionnaireId);
+        $completed = false;
 
-        $offset = 0;
-        $limit = 1000;
-        while (true) {
-            $interviews = $this->interviewRepo->getInterviewsByQuestionnaireIdAndMonth($questionnaireId, $month, $offset, $limit);
-            if (count($interviews) <= 0) {
-                break;
-            }
-            $this->checkInterviewsData($interviews);
-            $offset += 1000;
+        if ($deleteCurrentErrors) {
+            $this->deleteCurrentQuestionnaireValidationErrors($questionnaireId);
         }
 
-        return true;
+        $this->questionnaireId = $questionnaireId;
+        $interviews = $this->interviewRepo->getInterviewsByQuestionnaireIdAndMonth($questionnaireId, $month, $offset, $limit = 1000);
+        if (count($interviews) <= 0) {
+            $completed = true;
+            return $completed;
+        }
+
+        $this->checkInterviewsData($interviews);
+
+        return $completed;
     }
 
     /**
@@ -195,23 +198,10 @@ class Validator
             $this->section = $questionData->getSectionId();
             $this->question = $questionData->getQuestionCode();
             $this->answer = $questionData->getAnswer();
-            $questionValidations = $this->selectValidationsByQuestionCode($this->question);
+            $questionValidations = $this->validationRepo->getQuestionValidationsByQuestionnaireId($this->question, $this->questionnaireId);
 
             $this->checkQuestionValidations($questionValidations);
         }
-    }
-
-    /**
-     * Returns question validations from all validation list
-     *
-     * @param string $questionCode
-     * @return array
-     */
-    private function selectValidationsByQuestionCode(string $questionCode)
-    {
-        return array_filter($this->validations, function ($_validation) use ($questionCode) {
-            return $_validation->getAnswerCode() == $questionCode;
-        });
     }
 
     /**
@@ -256,7 +246,11 @@ class Validator
     private function buildRelatedAnswerExpression(Validation $validation): string
     {
         $rAnswerCode = $validation->getRelAnswerCode();
-        $rAnswerValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId(), $rAnswerCode);
+        if (!$validation->getInSameSection()) {
+            $rAnswerValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId(), $rAnswerCode);
+        } else {
+            $rAnswerValue = $this->interviewRepo->getQuestionAnswerInSection($this->interview->getInterviewId(), $rAnswerCode, $this->section);
+        }
 
         $rAnswerCompareOperator = $validation->getRelAnswerCompareOperatorName();
         $rAnswerComparedValue = $validation->getRelAnswerValue();
@@ -436,7 +430,11 @@ class Validator
                 $result = " ({$answer} {$compareOperator} {$comparedValue}";
                 break;
             case 'indicator':
-                $comparedValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId(), $comparedValue);
+                if ($comparedValueObj->getInSameSection()) {
+                    $comparedValue = $this->interviewRepo->getQuestionAnswerInSection($this->interview->getInterviewId(), $comparedValue, $this->section);
+                } else {
+                    $comparedValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId(), $comparedValue);
+                }
                 $result = " ({$answer} {$compareOperator} {$comparedValue}";
                 break;
             default:
@@ -532,7 +530,12 @@ class Validator
                 $expression .= " {$logicOperator} ({$answer} {$compareOperator} {$comparedValue})";
                 break;
             case 'indicator':
-                $comparedValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId(), $comparedValue);
+                if ($nextComparedValue->getInSameSection()) {
+                    $comparedValue = $this->interviewRepo->getQuestionAnswerInSection($this->interview->getInterviewId(), $comparedValue, $this->section);
+                } else {
+                    $comparedValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId(), $comparedValue);
+                }
+
                 if ($logicOperator == 'sum') {
                     $expression .= " + {$comparedValue}";
                 } else {

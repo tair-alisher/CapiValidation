@@ -72,6 +72,11 @@ class Validation
     private $relAnswerTypeId;
 
     /**
+     * @ORM\Column(type="boolean", name="in_same_section")
+     */
+    private $inSameSection;
+
+    /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Main\ComparedValueType", inversedBy="validations")
      * @ORM\JoinColumn(name="rel_answer_type_id")
      */
@@ -351,7 +356,7 @@ class Validation
      */
     public function setRelAnswerValue(string $relAnswerValue)
     {
-        $this->relAsnwerValue = $relAnswerValue;
+        $this->relAnswerValue = $relAnswerValue;
     }
 
     /**
@@ -402,6 +407,16 @@ class Validation
     public function getRelAnswerCompareOperatorName(): ?string
     {
         return $this->getRelAnswerCompareOperator()->getOperatorValue()->getName();
+    }
+
+    public function getInSameSection(): ?bool
+    {
+        return $this->inSameSection;
+    }
+
+    public function setInSameSection($inSameSection)
+    {
+        $this->inSameSection = $inSameSection;
     }
 
     /**
