@@ -29,6 +29,19 @@ class ValidationRepository extends ServiceEntityRepository
         return $paginator;
     }
 
+    public function getAllWithNameByPages($name, $currentPage = 1, $limit = 10): object
+    {
+        $query = $this->createQueryBuilder('v')
+            ->where('upper(v.title) LIKE upper(:name)')
+            ->orderBy('v.title', 'ASC')
+            ->setParameter('name', '%'.$name.'%')
+            ->getQuery();
+
+        $paginator = $this->paginate($query, $currentPage, $limit);
+
+        return $paginator;
+    }
+
     public function paginate($query, $page = 1, $limit)
     {
         $paginator = new Paginator($query);

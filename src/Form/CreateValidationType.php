@@ -2,7 +2,6 @@
 
 namespace App\Form;
 
-use App\Entity\Main\Validation;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -14,7 +13,6 @@ class CreateValidationType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        /** var \App\Service\Getter $validator */
         $getter = $options['getter'];
         $inputValueTypes = $getter->getInputValueTypes();
         $compareOperators = $getter->getCompareOperators();
@@ -92,14 +90,6 @@ class CreateValidationType extends AbstractType
                 'label' => 'Опросник*',
                 'attr' => ['class' => 'questionnaire-id']
             ]);
-            // ->add('create', SubmitType::class, [
-            //     'label' => 'Сохранить',
-            //     'attr' => [
-            //         'class' => 'btn-success pull-right',
-            //         'onclick' => 'saveValidation()',
-            //         'id' => 'save-validation-btn'
-            //     ]
-            // ]);
     }
 
     public function configureOptions(OptionsResolver $resolver)

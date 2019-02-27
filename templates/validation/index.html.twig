@@ -1,27 +1,45 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Валидации{% endblock %}
+{% block title %}Контроли{% endblock %}
 
 {% block body %}
 <div class="wrapper">
-  <h4>Валидации</h4>
+  <h4>Контроли</h4>
+  <hr>
+  <form action="{{ path('validation') }}" method="POST">
+    <div class="input-group mb-3">
+      <input type="text" name="value" class="form-control" placeholder="Введите название контроля" value="{{ searchValue }}">
+      <div class="input-group-append">
+        <button class="btn btn-outline-primary" type="submit">Искать</button>
+        <a href="{{ path('validation') }}" class="btn btn-outline-secondary">Сбросить</a>
+      </div>
+    </div>
+  </form>
   <hr>
   <a href="{{ path('validation.create_form') }}" class="btn btn-primary">Добавить контроль</a>
+  <br>
+  <br>
   <table class="table-sm">
-    {% for validation in validations %}
-    <tr id="validation-{{ validation.id }}">
-      <td>{{ validation.title }}</td>
-      <td>
-        {#<a href="" class="btn btn-primary">Редактировать</a>#}
-        <a href="{{ path('validation.details', {id: validation.id}) }}" class="btn btn-primary">
-          <span class="oi oi-eye"></span> Просмотреть
-        </a>
-        <button type="button" class="btn btn-danger remove-validation" data-id="{{ validation.id }}">
-          <span class="oi oi-x"></span> Удалить
-        </button>
-      </td>
-    </tr>
-    {% endfor %}
+    {% if validations|length > 0 %}
+      {% for validation in validations %}
+        <tr id="validation-{{ validation.id }}">
+          <td>{{ validation.title }}</td>
+          <td>
+            {#<a href="" class="btn btn-primary">Редактировать</a>#}
+            <a href="{{ path('validation.details', {id: validation.id}) }}" class="btn btn-primary">
+              <span class="oi oi-eye"></span> Просмотреть
+            </a>
+            <button type="button" class="btn btn-danger remove-validation" data-id="{{ validation.id }}">
+              <span class="oi oi-x"></span> Удалить
+            </button>
+          </td>
+        </tr>
+      {% endfor %}
+    {% else %}
+      <div class="row">
+        <p>Контроли не найдены.</p>
+      </div>
+    {% endif %}
   </table>
   <hr>
   {% if totalPages > 1 %}

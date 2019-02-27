@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Repository\Remote\QuestionnaireRepository;
 use App\Service\Getter;
 use App\Form\ValidateType;
 use App\Service\Validator;
@@ -19,18 +18,25 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class ValidationController extends AbstractController
 {
     /**
-     * @Route("/validation", name="validation", methods="GET")
+     * @Route("/validation", name="validation", methods={"GET", "POST"})
      */
-    public function index(ValidationRepository $validationRepository, $page = 1)
+    public function index(ValidationRepository $validationRepository, Request $request, $page = 1)
     {
         $limit = 10;
-        $validations = $validationRepository->getAllByPages($page, $limit);
+        $searchValue = $request->request->get('value');
+        if ($searchValue) {
+            $validations = $validationRepository->getAllWithNameByPages($searchValue, $page, $limit);
+        } else {
+            $validations = $validationRepository->getAllByPages($page, $limit);
+            $searchValue = '';
+        }
         $totalPages = ceil($validations->count() / $limit);
 
         return $this->render('validation/index.html.twig', [
             'validations' => $validations,
             'totalPages' => $totalPages,
-            'currentPage' => $page
+            'currentPage' => $page,
+            'searchValue' => $searchValue
         ]);
     }
 

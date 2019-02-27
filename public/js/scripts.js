@@ -4,17 +4,20 @@ function addComparedValue() {
   $.ajax({
     url: '/validation/add-compared-value',
     type: 'POST',
-    // async: true,
+    async: true,
 
     success: function (data) {
-      hideProcessingModal();
-      $('#compared-values').append(data);
-
+      setTimeout(function () {
+        hideProcessingModal();
+        $('#compared-values').append(data);
+      }, 500);
     },
     error: function(xhr) {
-      hideProcessingModal();
-      alert('Произошла ошибка.');
-      console.log(xhr.responseText);
+     setTimeout(function () {
+       hideProcessingModal();
+       alert('Произошла ошибка.');
+       console.log(xhr.responseText);
+     }, 500);
     }
   });
   return false;
@@ -38,16 +41,20 @@ function addQuestionnaire() {
   $.ajax({
     url: '/validation/add-questionnaire',
     type: 'POST',
-    // async: true,
+    async: true,
 
     success: function (data) {
-      hideProcessingModal();
-      $('#questionnaires').append(data);
+      setTimeout(function () {
+        hideProcessingModal();
+        $('#questionnaires').append(data);
+      }, 500);
     },
     error: function (xhr) {
-      hideProcessingModal();
-      alert('Произошла ошибка.');
-      console.log(xhr.responseText);
+      setTimeout(function () {
+        hideProcessingModal();
+        alert('Произошла ошибка.');
+        console.log(xhr.responseText);
+      }, 500);
     }
   });
   return false;
