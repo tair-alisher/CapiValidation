@@ -18,7 +18,7 @@ class InterviewRepository extends ServiceEntityRepository
         parent::__construct($registry, Interview::class);
     }
 
-    public function getInterviewsByQuestionnaireIdAndMonth($questionnaireId, $month, $offset, $limit): array
+    public function getInterviewsByQuestionnaireId($questionnaireId, $offset, $limit): array
     {
         $conn = $this->getEntityManager('server')->getConnection();
 
@@ -46,32 +46,34 @@ class InterviewRepository extends ServiceEntityRepository
                 :no_answer
             ) as answer,
             summary.updatedate as updatedat
-        from
-            readside.interviews as interview
-        join
-            readside.interviews_id as interview_id
-        on
-            interview.interviewid = interview_id.id
-        join
-            readside.interviewsummaries as summary
-        on
-            interview_id.interviewid = summary.interviewid
-        join
-            readside.questionnaire_entities as question_entity
-        on
-            interview.entityid = question_entity.id
+            
+        from readside.interviews as interview
+            
+        join readside.interviews_id as interview_id
+        on interview.interviewid = interview_id.id
+        
+        join readside.interviewsummaries as summary
+        on interview_id.interviewid = summary.interviewid
+        
+        join readside.questionnaire_entities as question_entity
+        on interview.entityid = question_entity.id
+        
+        join readside.interviewcommentaries as interview_info
+        on summary.summaryid = interview_info.id
+        
         where
-            extract(month from summary.updatedate) = :month and
             question_entity.stata_export_caption is not null and
+            interview_info.isdeleted = false and
+            interview_info.isapprovedbyhq = false and
             summary.questionnaireidentity = :questionnaire_id and
             summary.wasrejectedbysupervisor = false
+        order by interview_id
         offset :offset limit :limit;
         ';
 
         $stmt = $conn->prepare($query);
         $stmt->execute([
             'questionnaire_id' => $questionnaireId,
-            'month' => $month,
             'no_answer' => "''",
             'offset' => $offset,
             'limit' => $limit
@@ -218,7 +220,7 @@ class InterviewRepository extends ServiceEntityRepository
         return $row['answer'];
     }
 
-    public function getAllRowsCountByQuestionnaireIdAndMonth($questionnaireId, $month)
+    public function getAllRowsCountByQuestionnaireId($questionnaireId)
     {
         $em = $this->getEntityManager('server');
 
@@ -240,7 +242,6 @@ class InterviewRepository extends ServiceEntityRepository
         on
             interview.entityid = question_entity.id
         where
-            extract(month from summary.updatedate) = :month and
             question_entity.stata_export_caption is not null and
             summary.questionnaireidentity = :questionnaire_id and
             summary.wasrejectedbysupervisor = false
@@ -248,7 +249,6 @@ class InterviewRepository extends ServiceEntityRepository
 
         $statement = $em->getConnection()->prepare($query);
         $statement->execute([
-            'month' => $month,
             'questionnaire_id' => $questionnaireId
         ]);
 

@@ -16,7 +16,7 @@ class ValidateType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        /** var \App\Repository\Remove\QuestionnaireRepository $questionnareRepository */
+        /** var \App\Repository\Remove\QuestionnaireRepository $questionnaireRepository */
         $questionnaireRepository = $options['questionnaire_repository'];
         $questionnaires = $questionnaireRepository->getTitleIdArray();
 
@@ -24,17 +24,17 @@ class ValidateType extends AbstractType
             ->add('questionnaire', ChoiceType::class, [
                 'choices' => $questionnaires,
                 'label' => 'Форма'
-            ])
+            ]);
 //            ->add('quarter', NumberType::class, [
 //                'required' => false,
 //                'label' => 'Квартал',
 //                'attr' => ['placeholder' => 'квартал']
 //            ])
-            ->add('month', NumberType::class, [
-                'required' => false,
-                'label' => 'Месяц',
-                'attr' => ['placeholder' => 'месяц']
-            ]);
+//            ->add('month', NumberType::class, [
+//                'required' => false,
+//                'label' => 'Месяц',
+//                'attr' => ['placeholder' => 'месяц']
+//            ]);
 //            ->add('area', TextType::class, [
 //                'required' => false,
 //                'label' => 'Область',

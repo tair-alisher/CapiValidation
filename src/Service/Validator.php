@@ -144,7 +144,7 @@ class Validator
      * @param string
      * @param int
      */
-    public function validate($questionnaireId, $month, $offset, bool $deleteCurrentErrors)
+    public function validate($questionnaireId, $offset, bool $deleteCurrentErrors)
     {
         $completed = false;
 
@@ -153,7 +153,7 @@ class Validator
         }
 
         $this->questionnaireId = $questionnaireId;
-        $interviews = $this->interviewRepo->getInterviewsByQuestionnaireIdAndMonth($questionnaireId, $month, $offset, $limit = 1000);
+        $interviews = $this->interviewRepo->getInterviewsByQuestionnaireId($questionnaireId, $offset, $limit = 1000);
         if (count($interviews) <= 0) {
             $completed = true;
             return $completed;

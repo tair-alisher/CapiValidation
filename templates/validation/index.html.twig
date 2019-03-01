@@ -24,7 +24,7 @@
       {% for validation in validations %}
         <tr id="validation-{{ validation.id }}">
           <td>{{ validation.title }}</td>
-          <td>
+          <td class="btn-group" role="group">
             {#<a href="" class="btn btn-primary">Редактировать</a>#}
             <a href="{{ path('validation.details', {id: validation.id}) }}" class="btn btn-primary">
               <span class="oi oi-eye"></span> Просмотреть
@@ -66,6 +66,7 @@
   </ul>
   {% endif %}
 </div>
+{% include 'validation/processing.html' %}
 {% endblock %}
 
 {% block javascripts %}

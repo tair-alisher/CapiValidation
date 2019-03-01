@@ -207,14 +207,13 @@ class ValidationController extends AbstractController
         );
 
         $questionnaireId = $data->questionnaireId;
-        $month = $data->month;
 
-        if ($validator->validate($questionnaireId, $month, $data->offset, $data->deleteCurrentErrors)) {
+        if ($validator->validate($questionnaireId, $data->offset, $data->deleteCurrentErrors)) {
             $response['completed'] = true;
             return new JsonResponse($response);
         }
 
-        $response['allRowsCount'] = $inRepo->getAllRowsCountByQuestionnaireIdAndMonth($questionnaireId, $month);
+        $response['allRowsCount'] = $inRepo->getAllRowsCountByQuestionnaireId($questionnaireId);
 
         return new JsonResponse($response);
     }

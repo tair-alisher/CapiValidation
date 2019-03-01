@@ -158,6 +158,7 @@ function handleRemoveValidationBtnClick() {
         $('.remove-validation').click(function () {
             let confirmed = confirm('Вы уверены, что хотите удалить контроль?');
             if (confirmed) {
+              showProcessingModal();
               let validationId = $(this).data('id');
 
               $.ajax({
@@ -166,17 +167,23 @@ function handleRemoveValidationBtnClick() {
                 data: { 'id': validationId },
 
                 success: function (response) {
-                  if (response.success) {
-                    $('#validation-' + validationId).remove();
-                    alert('Контроль успешно удален.');
-                  } else {
-                    alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
-                    console.log(response.message);
-                  }
+                  setTimeout(function () {
+                    hideProcessingModal();
+                    if (response.success) {
+                      $('#validation-' + validationId).remove();
+                      alert('Контроль успешно удален.');
+                    } else {
+                      alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+                      console.log(response.message);
+                    }
+                  }, 500)
                 },
                 error: function (xhr) {
-                  alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
-                  console.log(xhr.responseText);
+                  setTimeout(function () {
+                    hideProcessingModal();
+                    alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+                    console.log(xhr.responseText);
+                  }, 500);
                 }
               });
             }
@@ -197,10 +204,8 @@ function goToPage() {
 
 function startValidate(deleteCurrentErrors = true, offset = 0) {
     let questionnaireId = $('#validate_questionnaire').val();
-    let month = $('#validate_month').val();
     let data = {
         'questionnaireId': questionnaireId,
-        'month': month,
         'offset': offset,
         'deleteCurrentErrors': deleteCurrentErrors
     };
