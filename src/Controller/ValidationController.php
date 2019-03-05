@@ -18,7 +18,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class ValidationController extends AbstractController
 {
     /**
-     * @Route("/validation", name="validation", methods={"GET", "POST"})
+     * @Route("/validation/{page}", name="validation", requirements={"page"="\d+"}, methods={"GET", "POST"})
      */
     public function index(ValidationRepository $validationRepository, Request $request, $page = 1)
     {

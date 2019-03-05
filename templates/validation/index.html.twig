@@ -26,12 +26,8 @@
           <td>{{ validation.title }}</td>
           <td class="btn-group" role="group">
             {#<a href="" class="btn btn-primary">Редактировать</a>#}
-            <a href="{{ path('validation.details', {id: validation.id}) }}" class="btn btn-primary">
-              <span class="oi oi-eye"></span> Просмотреть
-            </a>
-            <button type="button" class="btn btn-danger remove-validation" data-id="{{ validation.id }}">
-              <span class="oi oi-x"></span> Удалить
-            </button>
+            <a href="{{ path('validation.details', {id: validation.id}) }}" class="btn btn-primary">Просмотреть</a>
+            <button type="button" class="btn btn-danger remove-validation" data-id="{{ validation.id }}">Удалить</button>
           </td>
         </tr>
       {% endfor %}

@@ -203,6 +203,7 @@ function goToPage() {
 }
 
 function startValidate(deleteCurrentErrors = true, offset = 0) {
+    $('#start-validate-btn').attr('disabled', 'disabled');
     let questionnaireId = $('#validate_questionnaire').val();
     let data = {
         'questionnaireId': questionnaireId,

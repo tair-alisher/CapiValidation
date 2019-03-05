@@ -24,52 +24,51 @@ class InterviewRepository extends ServiceEntityRepository
 
         $query = '
         select
-            summary.summaryid as interview_id,
-            summary.questionnaireidentity as questionnaire_id,
-            question_entity.stata_export_caption as question,
-            question_entity.parentid as section,
-			interview.rostervector as _id,
-            coalesce(
-                interview.asstring,
-                cast(interview.asint as varchar),
-                cast(interview.aslong as varchar),
-                cast(interview.asdouble as varchar),
-                cast(interview.asdatetime as varchar),
-                cast(interview.aslist as varchar),
-                cast(interview.asbool as varchar),
-                cast(interview.asintarray as varchar),
-                cast(interview.asintmatrix as varchar),
-                cast(interview.asgps as varchar),
-                cast(interview.asyesno as varchar),
-                cast(interview.asaudio as varchar),
-                cast(interview.asarea as varchar),
-                :no_answer
-            ) as answer,
-            summary.updatedate as updatedat
+                summary.summaryid as interview_id,
+                summary.questionnaireidentity as questionnaire_id,
+                question_entity.stata_export_caption as question,
+                question_entity.parentid as section,
+                interview.rostervector as _id,
+                coalesce(
+                    interview.asstring,
+                    cast(interview.asint as varchar),
+                    cast(interview.aslong as varchar),
+                    cast(interview.asdouble as varchar),
+                    cast(interview.asdatetime as varchar),
+                    cast(interview.aslist as varchar),
+                    cast(interview.asbool as varchar),
+                    cast(interview.asintarray as varchar),
+                    cast(interview.asintmatrix as varchar),
+                    cast(interview.asgps as varchar),
+                    cast(interview.asyesno as varchar),
+                    cast(interview.asaudio as varchar),
+                    cast(interview.asarea as varchar),
+                    :no_answer
+                ) as answer,
+                summary.updatedate as updatedat
+                
+            from readside.interviews as interview
+                
+            join readside.interviews_id as interview_id
+            on interview.interviewid = interview_id.id
             
-        from readside.interviews as interview
+            join readside.interviewsummaries as summary
+            on interview_id.interviewid = summary.interviewid
             
-        join readside.interviews_id as interview_id
-        on interview.interviewid = interview_id.id
-        
-        join readside.interviewsummaries as summary
-        on interview_id.interviewid = summary.interviewid
-        
-        join readside.questionnaire_entities as question_entity
-        on interview.entityid = question_entity.id
-        
-        join readside.interviewcommentaries as interview_info
-        on summary.summaryid = interview_info.id
-        
-        where
-            question_entity.stata_export_caption is not null and
-            interview_info.isdeleted = false and
-            interview_info.isapprovedbyhq = false and
-            summary.questionnaireidentity = :questionnaire_id and
-            summary.wasrejectedbysupervisor = false
-        order by interview_id
-        offset :offset limit :limit;
-        ';
+            join readside.questionnaire_entities as question_entity
+            on interview.entityid = question_entity.id
+            
+            join readside.interviewcommentaries as interview_info
+            on summary.summaryid = interview_info.id
+            
+            where
+                question_entity.stata_export_caption is not null and
+                interview_info.isdeleted = false and
+                interview_info.isapprovedbyhq = false and
+                summary.questionnaireidentity = :questionnaire_id and
+                summary.wasrejectedbysupervisor = false
+            order by interview_id
+            offset :offset limit :limit;';
 
         $stmt = $conn->prepare($query);
         $stmt->execute([
@@ -225,24 +224,26 @@ class InterviewRepository extends ServiceEntityRepository
         $em = $this->getEntityManager('server');
 
         $query = '
-        select
-            count(summary.summaryid) as all_rows_count
-        from
-            readside.interviews as interview
-        join
-            readside.interviews_id as interview_id
-        on
-            interview.interviewid = interview_id.id
-        join
-            readside.interviewsummaries as summary
-        on
-            interview_id.interviewid = summary.interviewid
-        join
-            readside.questionnaire_entities as question_entity
-        on
-            interview.entityid = question_entity.id
+        select count(summary.summaryid) as all_rows_count
+        
+        from readside.interviews as interview
+        
+        join readside.interviews_id as interview_id
+        on interview.interviewid = interview_id.id
+        
+        join readside.interviewsummaries as summary
+        on interview_id.interviewid = summary.interviewid
+        
+        join readside.questionnaire_entities as question_entity
+        on interview.entityid = question_entity.id
+        
+        join readside.interviewcommentaries as interview_info
+        on summary.summaryid = interview_info.id
+        
         where
             question_entity.stata_export_caption is not null and
+            interview_info.isdeleted = false and
+            interview_info.isapprovedbyhq = false and
             summary.questionnaireidentity = :questionnaire_id and
             summary.wasrejectedbysupervisor = false
         ';

@@ -230,7 +230,7 @@ class Validator
 
         if ($validation->getRelAnswerCode() != null) {
             $expression = $this->buildRelatedAnswerExpression($validation);
-            eval('$isValid = ' . $expression);
+            eval('$isValid =' . $expression);
         }
 
         return $isValid;
@@ -261,7 +261,7 @@ class Validator
                 $rAnswerComparedValue = new Set($rAnswerComparedValue, 'integer');
                 $result = ' (';
                 foreach ($rAnswerComparedValue->values() as $value) {
-                    $result .= "({$rAnswerValue} {$rAnswerCompareOperator} {$value} || ";
+                    $result .= "({$rAnswerValue} {$rAnswerCompareOperator} {$value}) || ";
                 }
                 $result = rtrim($result, ' ||');
                 break;
@@ -269,7 +269,7 @@ class Validator
                 $rAnswerComparedValue = new Set($rAnswerComparedValue, 'string');
                 $result = ' (';
                 foreach ($rAnswerComparedValue->values() as $value) {
-                    $result .= "({$rAnswerValue} {$rAnswerCompareOperator} {$value} || ";
+                    $result .= "({$rAnswerValue} {$rAnswerCompareOperator} {$value}) || ";
                 }
                 $result = rtrim($result, ' ||');
                 break;
@@ -337,7 +337,7 @@ class Validator
             $answer = strlen($this->answer);
         } else {
             // eval('$answer = ' . "({$answerType}){$answer};");
-            $answer = $type == 'datetime' ? date_create_from_format('d.m.Y', $this->answer) : "({$type}){$this->answer}";
+            $answer = $type == 'datetime' ? date_create_from_format('Y-m-d H:i:s', $this->answer) : "({$type}){$this->answer}";
         }
 
         return $answer;
@@ -423,7 +423,12 @@ class Validator
                 $result = " ({$answer} >= {$from} && {$answer} <= {$to}";
                 break;
             case 'null':
-                $result = " ({$answer} {$compareOperator} null";
+                try {
+                    $result = " ({$answer} {$compareOperator} null";
+                } catch (\Exception $e) {
+                    $answer = $answer->format('Y-m-d');
+                    $result = " ('{$answer}' {$compareOperator} null";
+                }
                 break;
             case 'datetime':
                 $comparedValue = date_create_from_format('d.m.Y', $comparedValue);
@@ -523,7 +528,12 @@ class Validator
                 $expression .= " {$logicOperator} ({$answer} >= {$from} && {$answer} <= {$to})";
                 break;
             case 'null':
-                $expression .= " {$logicOperator} ({$answer}) {$compareOperator} null)";
+                try {
+                    $expression .= " {$logicOperator} ({$answer}) {$compareOperator} null)";
+                } catch (\Exception $e) {
+                    $answer = $answer->format('Y-m-d');
+                    $expression .= " {$logicOperator} ('{$answer}') {$compareOperator} null)";
+                }
                 break;
             case 'datetime':
                 $comparedValue = date_create_from_format('d.m.Y', $comparedValue);
