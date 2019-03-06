@@ -149,7 +149,7 @@ class Validator
         $completed = false;
 
         if ($deleteCurrentErrors) {
-            $this->deleteCurrentQuestionnaireValidationErrors($questionnaireId);
+            $this->errorRepo->deleteCurrentQuestionnaireValidationErrors($questionnaireId);
         }
 
         $this->questionnaireId = $questionnaireId;
@@ -162,16 +162,6 @@ class Validator
         $this->checkInterviewsData($interviews);
 
         return $completed;
-    }
-
-    /**
-     * Removes questionnaire's existing validation errors
-     *
-     * @param $questionnaireId
-     */
-    private function deleteCurrentQuestionnaireValidationErrors($questionnaireId)
-    {
-        $this->errorRepo->deleteRowsByQuestionnaireId($questionnaireId);
     }
 
     /**
@@ -246,11 +236,7 @@ class Validator
     private function buildRelatedAnswerExpression(Validation $validation): string
     {
         $rAnswerCode = $validation->getRelAnswerCode();
-        if (!$validation->getInSameSection()) {
-            $rAnswerValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId(), $rAnswerCode);
-        } else {
-            $rAnswerValue = $this->interviewRepo->getQuestionAnswerInSection($this->interview->getInterviewId(), $rAnswerCode, $this->section);
-        }
+        $rAnswerValue = $this->getIndicatorComparedValue($validation->getInSameSection(), $rAnswerCode);
 
         $rAnswerCompareOperator = $validation->getRelAnswerCompareOperatorName();
         $rAnswerComparedValue = $validation->getRelAnswerValue();
@@ -291,6 +277,19 @@ class Validator
             case 'indicator':
                 $rAnswerComparedValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId, $rAnswerComparedValue);
                 $result = "{$rAnswerValue} {$rAnswerCompareOperator} {$rAnswerComparedValue}";
+                break;
+            case 'json':
+                $productCode = explode('_', $this->section)[1];
+                if (strpos($rAnswerValue, ',') !== false) {
+                    $result = "{$productCode} {$rAnswerCompareOperator} {$rAnswerValue}";
+                } else {
+                    $rAnswerComparedValue = new Set($rAnswerComparedValue, 'integer');
+                    $result = ' (';
+                    foreach ($rAnswerComparedValue->values() as $value) {
+                        $result .= "({$productCode} {$rAnswerCompareOperator} {$value}) || ";
+                    }
+                    $result = rtrim($result, ' ||');
+                }
                 break;
             default:
                 $result = " (({$rAnswerType}){$rAnswerValue} {$rAnswerCompareOperator} ({$rAnswerType}){$rAnswerComparedValue}";
@@ -402,19 +401,11 @@ class Validator
         switch ($comparedValueType) {
             case 'int_set':
                 $comparedValue = new Set($comparedValue, 'integer');
-                $result = ' (';
-                foreach ($comparedValue->values() as $value) {
-                    $result .= "({$answer} {$compareOperator} {$value}) || ";
-                }
-                $result = rtrim($result, ' ||');
+                $result = $this->buildFirstSetComparedValueExpression($comparedValue, $answer, $compareOperator);
                 break;
             case 'str_set':
                 $comparedValue = new Set($comparedValue, 'string');
-                $result = ' (';
-                foreach ($comparedValue->values() as $value) {
-                    $result .= "({$answer} {$compareOperator} {$value}) || ";
-                }
-                $result = rtrim($result, ' ||');
+                $result = $this->buildFirstSetComparedValueExpression($comparedValue, $answer, $compareOperator);
                 break;
             case 'range':
                 $comparedValue = new Range($comparedValue);
@@ -435,11 +426,7 @@ class Validator
                 $result = " ({$answer} {$compareOperator} {$comparedValue}";
                 break;
             case 'indicator':
-                if ($comparedValueObj->getInSameSection()) {
-                    $comparedValue = $this->interviewRepo->getQuestionAnswerInSection($this->interview->getInterviewId(), $comparedValue, $this->section);
-                } else {
-                    $comparedValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId(), $comparedValue);
-                }
+                $comparedValue = $this->getIndicatorComparedValue($comparedValueObj->getInSameSection(), $comparedValue);
                 $result = " ({$answer} {$compareOperator} {$comparedValue}";
                 break;
             default:
@@ -447,6 +434,46 @@ class Validator
         }
 
         return $result;
+    }
+
+    /**
+     * Builds and returns expression for the first compared value if it's Set
+     *
+     * @param Set $comparedValue
+     * @param $answer
+     * @param $compareOperator
+     * @return null|string
+     */
+    private function buildFirstSetComparedValueExpression(Set $comparedValue, $answer, $compareOperator): ?string
+    {
+        $result = ' (';
+        foreach ($comparedValue->values() as $value) {
+            $result .= "({$answer} {$compareOperator} {$value}) || ";
+        }
+        $result = rtrim($result, ' ||');
+
+        return $result;
+    }
+
+    /**
+     * Returns answer on question by interview id, question code and section if required
+     *
+     * @param bool $inSameSection
+     * @param $comparedValue
+     * @return null|string
+     */
+    private function getIndicatorComparedValue(bool $inSameSection, $comparedValue)
+    {
+        $value = $comparedValue;
+        if ($inSameSection) {
+            $value = $this->interviewRepo->getQuestionAnswerInSection(
+                $this->interview->getInterviewId(), $value, $this->section
+            );
+        } else {
+            $value = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId(), $value);
+        }
+
+        return $value;
     }
 
     /**
@@ -540,11 +567,7 @@ class Validator
                 $expression .= " {$logicOperator} ({$answer} {$compareOperator} {$comparedValue})";
                 break;
             case 'indicator':
-                if ($nextComparedValue->getInSameSection()) {
-                    $comparedValue = $this->interviewRepo->getQuestionAnswerInSection($this->interview->getInterviewId(), $comparedValue, $this->section);
-                } else {
-                    $comparedValue = $this->interviewRepo->getQuestionAnswer($this->interview->getInterviewId(), $comparedValue);
-                }
+                $comparedValue = $this->getIndicatorComparedValue($nextComparedValue->getInSameSection(), $comparedValue);
 
                 if ($logicOperator == 'sum') {
                     $expression .= " + {$comparedValue}";

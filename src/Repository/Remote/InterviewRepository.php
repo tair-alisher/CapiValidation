@@ -110,47 +110,43 @@ class InterviewRepository extends ServiceEntityRepository
         $em = $this->getEntityManager('server');
 
         $query = '
-        select
-            coalesce(
-                interview.asstring,
-                cast(interview.asint as varchar),
-                cast(interview.aslong as varchar),
-                cast(interview.asdouble as varchar),
-                cast(interview.asdatetime as varchar),
-                cast(interview.aslist as varchar),
-                cast(interview.asbool as varchar),
-                cast(interview.asintarray as varchar),
-                cast(interview.asintmatrix as varchar),
-                cast(interview.asgps as varchar),
-                cast(interview.asyesno as varchar),
-                cast(interview.asaudio as varchar),
-                cast(interview.asarea as varchar),
-                :no_answer
-            ) as answer
-        from
-          readside.interviews as interview
-        join
-          readside.interviews_id as interview_id
-        on
-          interview.interviewid = interview_id.id
-        join
-          readside.interviewsummaries as summary
-        on
-          interview_id.interviewid = summary.interviewid
-        join
-          readside.questionnaire_entities as question_entity
-        on
-          interview.entityid = question_entity.id
-        where
-          question_entity.stata_export_caption = :questionCode and
-          summary.interviewid = :interviewId
+        select coalesce(
+            interview.asstring,
+            cast(interview.asint as varchar),
+            cast(interview.aslong as varchar),
+            cast(interview.asdouble as varchar),
+            cast(interview.asdatetime as varchar),
+            cast(interview.aslist as varchar),
+            cast(interview.asbool as varchar),
+            cast(interview.asintarray as varchar),
+            cast(interview.asintmatrix as varchar),
+            cast(interview.asgps as varchar),
+            cast(interview.asyesno as varchar),
+            cast(interview.asaudio as varchar),
+            cast(interview.asarea as varchar),
+            :no_answer
+        ) as answer
+
+        from readside.interviews as interview
+
+        join readside.interviews_id as interview_id
+        on interview.interviewid = interview_id.id
+
+        join readside.interviewsummaries as summary
+        on interview_id.interviewid = summary.interviewid
+
+        join readside.questionnaire_entities as question_entity
+
+        on interview.entityid = question_entity.id
+        where question_entity.stata_export_caption = :question_code and
+          summary.interviewid = :interview_id
         limit 1';
 
         $statement = $em->getConnection()->prepare($query);
         $statement->execute([
             'no_answer' => "''",
-            'interviewId' => $interviewId,
-            'questionCode' => $questionCode
+            'interview_id' => $interviewId,
+            'question_code' => $questionCode
         ]);
 
         $row = $statement->fetch();
@@ -167,39 +163,35 @@ class InterviewRepository extends ServiceEntityRepository
         $em = $this->getEntityManager();
 
         $query = '
-        select
-            coalesce(
-                interview.asstring,
-                cast(interview.asint as varchar),
-                cast(interview.aslong as varchar),
-                cast(interview.asdouble as varchar),
-                cast(interview.asdatetime as varchar),
-                cast(interview.aslist as varchar),
-                cast(interview.asbool as varchar),
-                cast(interview.asintarray as varchar),
-                cast(interview.asintmatrix as varchar),
-                cast(interview.asgps as varchar),
-                cast(interview.asyesno as varchar),
-                cast(interview.asaudio as varchar),
-                cast(interview.asarea as varchar),
-                :no_answer
-            ) as answer
-        from
-          readside.interviews as interview
-        join
-          readside.interviews_id as interview_id
-        on
-          interview.interviewid = interview_id.id
-        join
-          readside.interviewsummaries as summary
-        on
-          interview_id.interviewid = summary.interviewid
-        join
-          readside.questionnaire_entities as question_entity
-        on
-          interview.entityid = question_entity.id
-        where
-          question_entity.stata_export_caption = :questionCode and
+        select coalesce(
+            interview.asstring,
+            cast(interview.asint as varchar),
+            cast(interview.aslong as varchar),
+            cast(interview.asdouble as varchar),
+            cast(interview.asdatetime as varchar),
+            cast(interview.aslist as varchar),
+            cast(interview.asbool as varchar),
+            cast(interview.asintarray as varchar),
+            cast(interview.asintmatrix as varchar),
+            cast(interview.asgps as varchar),
+            cast(interview.asyesno as varchar),
+            cast(interview.asaudio as varchar),
+            cast(interview.asarea as varchar),
+            :no_answer
+        ) as answer
+
+        from readside.interviews as interview
+
+        join readside.interviews_id as interview_id
+        on interview.interviewid = interview_id.id
+
+        join readside.interviewsummaries as summary
+        on interview_id.interviewid = summary.interviewid
+
+        join readside.questionnaire_entities as question_entity
+        on interview.entityid = question_entity.id
+
+        where question_entity.stata_export_caption = :questionCode and
           summary.interviewid = :interviewId and
           question_entity.parentid = :section and
           interview.rostervector = :sectionId
@@ -240,8 +232,7 @@ class InterviewRepository extends ServiceEntityRepository
         join readside.interviewcommentaries as interview_info
         on summary.summaryid = interview_info.id
         
-        where
-            question_entity.stata_export_caption is not null and
+        where question_entity.stata_export_caption is not null and
             interview_info.isdeleted = false and
             interview_info.isapprovedbyhq = false and
             summary.questionnaireidentity = :questionnaire_id and

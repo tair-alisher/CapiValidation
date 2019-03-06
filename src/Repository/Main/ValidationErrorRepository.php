@@ -40,7 +40,7 @@ class ValidationErrorRepository extends ServiceEntityRepository
         return $pgr;
     }
 
-    public function deleteRowsByQuestionnaireId($questionnaireId)
+    public function deleteCurrentQuestionnaireValidationErrors($questionnaireId)
     {
         $deleted = $this->createQueryBuilder('e')
             ->delete()
