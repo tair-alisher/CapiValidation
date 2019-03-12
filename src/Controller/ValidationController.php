@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Main\QuestionnaireValidation;
 use App\Service\Getter;
 use App\Form\ValidateType;
 use App\Service\Validator;
@@ -11,6 +12,7 @@ use App\Repository\Main\ValidationRepository;
 use App\Repository\Remote\InterviewRepository;
 use App\Repository\Remote\QuestionnaireRepository as QuestRepo;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -172,19 +174,69 @@ class ValidationController extends AbstractController
     {
         $validationId = $request->request->get('validationId');
         $name = $request->request->get('name');
-        $response = array(
-            'success' => true,
-            'message' => ''
-        );
+
+        $response = ['success' => true, 'message' => ''];
 
         try {
             $validator->renameValidation($validationId, $name);
-            return new JsonResponse($response);
         } catch (\Exception $e) {
             $response['success'] = false;
             $response['message'] = $e->getMessage();
-            return new JsonResponse($response);
         }
+
+        return new JsonResponse($response);
+    }
+
+    /**
+     * @Route("/validation/detach")
+     */
+    public function detach(Request $request, Validator $validator)
+    {
+        $validationId = $request->request->get('validationId');
+        $questionnaireId = $request->request->get('questionnaireId');
+
+        $response = ['success' => true, 'message' => ''];
+
+        try {
+            $validator->detachValidation($validationId, $questionnaireId);
+        } catch (\Exception $e) {
+            $response['success'] = false;
+            $response['message'] = $e->getMessage();
+        }
+
+        return new JsonResponse($response);
+    }
+
+    /**
+     * @Route("/validation/get-questionnaires-list")
+     */
+    public function getQuestionnairesList(QuestRepo $questRepo)
+    {
+        $questionnaires = $questRepo->getTitleIdArray();
+
+        return $this->render('validation/questionnaire_list.html.twig', [
+            'questionnaires' => $questionnaires
+        ]);
+    }
+
+    /**
+     * @Route("/validation/attach")
+     */
+    public function attach(QuestRepo $questRepo, Request $request, Validator $validator)
+    {
+        $validationId = $request->request->get('validationId');
+        $questionnaireId = $request->request->get('questionnaireId');
+
+        if ($validator->questionnaireValidationAlreadyExists($validationId, $questionnaireId)) {
+           return new Response('already_exists');
+        }
+
+        $validator->attachValidation($validationId, $questionnaireId);
+        $questionnaire = $questRepo->find($questionnaireId);
+
+        return $this->render('validation/attached_questionnaire.html.twig', [
+            'questionnaire' => $questionnaire
+        ]);
     }
 
     /**

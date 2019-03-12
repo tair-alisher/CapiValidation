@@ -1,0 +1,22 @@
+<div id="questionnaires-dropdown">
+  <div class="row questionnaire">
+    <div class="col-md-12 col-sm-12">
+      <div class="form-group">
+        <b><label for="questionnaire-id" class="required">Опросник</label></b>
+        <div class="row">
+          <div class="col-md-10 col-sm-10">
+            <select name="questionnaire-id" id="questionnaire-id" class="questionnaire-id form-control">
+              {% for item in questionnaires|keys %}
+                <option value="{{ questionnaires[item] }}">{{ item }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-2 col-sm-2 btn-group">
+            <button class="btn btn-success" type="button" onclick="attachQuestionnaireSubmit()">Сохранить</button>
+            <button class="btn btn-danger" type="button" onclick="removeAttachQuestionnaireForm()">Убрать</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

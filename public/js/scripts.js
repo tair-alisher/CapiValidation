@@ -156,13 +156,13 @@ function saveValidation() {
 function handleRemoveValidationBtnClick() {
     $(document).ready(function () {
         $('.remove-validation').click(function () {
-            let confirmed = confirm('Вы уверены, что хотите удалить контроль?');
+            var confirmed = confirm('Вы уверены, что хотите удалить контроль?');
             if (confirmed) {
               showProcessingModal();
-              let validationId = $(this).data('id');
+              var validationId = $(this).data('id');
 
               $.ajax({
-                url: '/validation/delete',
+                url: '/validation/devare',
                 type: 'POST',
                 data: { 'id': validationId },
 
@@ -194,10 +194,10 @@ function handleRemoveValidationBtnClick() {
 function handleRenameValidationBtnClick() {
   $(document).ready(function() {
     $('.rename-validation').click(function () {
-      let validationId = $(this).data('id');
+      var validationId = $(this).data('id');
       $('#validation-title-block').hide();
 
-      let renameInput = document.createElement('input');
+      var renameInput = document.createElement('input');
       renameInput.className = 'form-control';
       renameInput.id = 'new-validation-title';
       renameInput.name = 'validation-title';
@@ -205,29 +205,29 @@ function handleRenameValidationBtnClick() {
       renameInput.dataset.id = validationId;
       renameInput.value = document.getElementById('validation-title').innerText;
 
-      let renameInputDiv = document.createElement('div');
+      var renameInputDiv = document.createElement('div');
       renameInputDiv.className = 'col-md-10';
       renameInputDiv.append(renameInput);
 
-      let renameSubmitBtn = document.createElement('button');
+      var renameSubmitBtn = document.createElement('button');
       renameSubmitBtn.className = 'btn btn-primary';
       renameSubmitBtn.innerText = 'Сохранить';
       renameSubmitBtn.type = 'button';
       renameSubmitBtn.addEventListener('click', handleRenameValidationSubmit);
       renameSubmitBtn.dataset.id = validationId;
 
-      let cancelBtn = document.createElement('button');
+      var cancelBtn = document.createElement('button');
       cancelBtn.className = 'btn btn-danger';
       cancelBtn.innerText = 'Отмена';
       cancelBtn.type = 'button';
       cancelBtn.addEventListener('click', removeRenameForm);
 
-      let renameBtnGroup = document.createElement('div');
+      var renameBtnGroup = document.createElement('div');
       renameBtnGroup.className = 'btn-group col-md-2';
       renameBtnGroup.append(renameSubmitBtn);
       renameBtnGroup.append(cancelBtn);
 
-      let renameDiv = document.createElement('div');
+      var renameDiv = document.createElement('div');
       renameDiv.className = 'row';
       renameDiv.id = 'rename-block';
       renameDiv.append(renameInputDiv);
@@ -239,8 +239,8 @@ function handleRenameValidationBtnClick() {
 }
 
 function handleRenameValidationSubmit() {
-  let validationId = $(this).data('id');
-  let name = document.getElementById('new-validation-title').value;
+  var validationId = $(this).data('id');
+  var name = document.getElementById('new-validation-title').value;
 
   $.ajax({
     url: '/validation/rename',
@@ -260,6 +260,7 @@ function handleRenameValidationSubmit() {
         console.log(response.message);
       }
     },
+
     error: function (xhr) {
       alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
       console.log(xhr.responseText);
@@ -272,29 +273,113 @@ function removeRenameForm() {
   $('#validation-title-block').show();
 }
 
+function handleDetachQuestionnaireBtnClick(questionnaireId) {
+  var validationId = document.getElementById('validation-id').value;
+
+  $.ajax({
+    url: '/validation/detach',
+    type: 'POST',
+    data: {
+      'validationId': validationId,
+      'questionnaireId': questionnaireId
+    },
+
+    success: function (response) {
+      if (response.success) {
+        var rowToDelete = document.getElementById('questionnaire-' + questionnaireId);
+        rowToDelete.parentElement.removeChild(rowToDelete);
+      } else {
+        alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+        console.log(response.message);
+      }
+    },
+
+    error: function (xhr) {
+      alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+      console.log(xhr.responseText);
+    }
+  });
+}
+
+function handleAttachQuestionnaireBtnClick() {
+  $(document).ready(function () {
+    $('.attach-questionnaire-btn').click(function () {
+      $.ajax({
+        url: '/validation/get-questionnaires-list',
+        type: 'GET',
+        success: function (html) {
+          $('#attach-questionnaire-btn').hide();
+          $('#questionnaires').append(html);
+        },
+        error: function (xhr) {
+          alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+          console.log(xhr.responseText);
+        }
+      });
+    });
+  });
+}
+
+function attachQuestionnaireSubmit() {
+  var questionnaireId = document.getElementById('questionnaire-id').value;
+  var validationId = document.getElementById('validation-id').value;
+
+  $.ajax({
+    url: '/validation/attach',
+    type: 'POST',
+    data: {
+      'validationId': validationId,
+      'questionnaireId': questionnaireId
+    },
+
+    success: function (html) {
+      if (html === 'already_exists') {
+        $('#questionnaires-dropdown').remove();
+        $('#attach-questionnaire-btn').show();
+        alert('Валидация уже прикреплена к данному опроснику.');
+      } else {
+        $('#questionnaires-dropdown').remove();
+        $('#questionnaires-list').append(html);
+        $('#attach-questionnaire-btn').show();
+      }
+
+    },
+
+    error: function (xhr) {
+      alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+      console.log(xhr.responseText);
+    }
+  })
+}
+
+function removeAttachQuestionnaireForm() {
+  $('#questionnaires-dropdown').remove();
+  $('#attach-questionnaire-btn').show();
+}
+
 function goToPage() {
     $(document).ready(function () {
         $('#go-to-page-btn').click(function () {
-            let page = $('#page-value').val();
-            let questionnaireId = $(this).data('id');
+            var page = $('#page-value').val();
+            var questionnaireId = $(this).data('id');
 
             window.location.href='/questionnaire/' + questionnaireId + '/errors/' + page;
         })
     })
 }
 
-function startValidate(deleteCurrentErrors = true, offset = 0) {
+function startValidate(devareCurrentErrors = true, offset = 0) {
     $('#start-validate-btn').attr('disabled', 'disabled');
-    let questionnaireId = $('#validate_questionnaire').val();
-    let data = {
+    var questionnaireId = $('#validate_questionnaire').val();
+    var data = {
         'questionnaireId': questionnaireId,
         'offset': offset,
-        'deleteCurrentErrors': deleteCurrentErrors
+        'devareCurrentErrors': devareCurrentErrors
     };
 
-    let progressIndicator = $('#progress-indicator');
+    var progressIndicator = $('#progress-indicator');
     if (!progressIndicator.length) {
-        let alertBlock = document.createElement('div');
+        var alertBlock = document.createElement('div');
         alertBlock.className = 'alert alert-primary';
         alertBlock.id = 'progress-indicator';
         alertBlock.setAttribute('role', 'alert');
@@ -309,11 +394,11 @@ function startValidate(deleteCurrentErrors = true, offset = 0) {
         data: JSON.stringify(data),
 
         success: function (response) {
-            if (response.completed) {
+            if (response.compvared) {
                 window.location.href='/questionnaire/' + questionnaireId + '/errors';
             } else {
-                let allRowsCount = response.allRowsCount;
-                let checkedRowsPercent = (offset * 100) / allRowsCount;
+                var allRowsCount = response.allRowsCount;
+                var checkedRowsPercent = (offset * 100) / allRowsCount;
                 $('#progress-indicator').text('Прогресс (%): ' + Math.round(checkedRowsPercent) + '/100');
 
                 startValidate(false, offset += 1000);

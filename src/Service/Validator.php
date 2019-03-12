@@ -139,6 +139,8 @@ class Validator
     }
 
     /**
+     * Renames validation title
+     *
      * @param $validationId
      * @param $name
      * @throws \Exception
@@ -151,6 +153,50 @@ class Validator
         }
         $validation->setTitle($name);
         $this->em->flush();
+    }
+
+    /**
+     * Returns true if relation questionnaire validation exists
+     *
+     * @param $validationId
+     * @param $questionnaireId
+     * @return bool
+     */
+    public function questionnaireValidationAlreadyExists($validationId, $questionnaireId): bool
+    {
+        $rowExists = $this->em->getRepository(QuestionnaireValidation::class)->findOneBy([
+            'validationId' => $validationId,
+            'questionnaireId' => $questionnaireId
+        ]);
+
+        return $rowExists != null;
+    }
+
+    /**
+     * Attaches validation to questionnaire
+     *
+     * @param $validationId
+     * @param $questionnaireId
+     */
+    public function attachValidation($validationId, $questionnaireId)
+    {
+        $questValidation = new QuestionnaireValidation();
+        $questValidation->setValidation($this->getter->validationRepo()->find($validationId));
+        $questValidation->setQuestionnaireId($questionnaireId);
+
+        $this->em->persist($questValidation);
+        $this->em->flush();
+    }
+
+    /**
+     * Detaches validation from questionnaire
+     *
+     * @param $validationId
+     * @param $questionnaireId
+     */
+    public function detachValidation($validationId, $questionnaireId)
+    {
+        $this->validationRepo->detachValidationFromQuestionnaire($validationId, $questionnaireId);
     }
 
     /**

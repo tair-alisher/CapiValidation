@@ -7,6 +7,7 @@
   <div id="validation-title-block">
     <h4><span id="validation-title">{{ validation.title }}</span> <button data-id="{{ validation.id }}" class="btn btn-primary rename-validation">Переименовать</button></h4>
   </div>
+  <input type="hidden" name="validation-id" id="validation-id" value="{{ validation.id }}">
   <hr>
   <div class="answer">
     <p><b><i>Проверяемый ответ</i></b></p>
@@ -88,14 +89,19 @@
   </div>
   <hr>
 
-  <div class="questionnaires">
+  <div class="questionnaires" id="questionnaires">
     <p><b><i>Относится к опросникам</i></b></p>
-    <ul>
+    <table id="questionnaires-list">
       {% for questionnaire in questionnaires %}
-        <li>{{ questionnaire.title }}</li>
+        <tr id="questionnaire-{{ questionnaire.id }}">
+          <td>{{ questionnaire.title }}</td>
+          <td><button type="button" class="btn btn-danger detach-questionnaire-btn" onclick="handleDetachQuestionnaireBtnClick('{{ questionnaire.id }}')">Открепить</button></td>
+        </tr>
       {% endfor %}
-    </ul>
+    </table>
+    <button class="btn btn-primary attach-questionnaire-btn" id="attach-questionnaire-btn">Добавить</button>
   </div>
+  <br>
   <a href="{{ path('validation') }}" class="btn btn-secondary">К списку контролей</a>
 </div>
 {% endblock %}
@@ -104,5 +110,6 @@
   {{ parent() }}
   <script>
     handleRenameValidationBtnClick();
+    handleAttachQuestionnaireBtnClick();
   </script>
 {% endblock %}

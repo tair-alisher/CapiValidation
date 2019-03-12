@@ -112,6 +112,26 @@ class ValidationRepository extends ServiceEntityRepository
         $statement->execute();
     }
 
+    /**
+     * @param $validationId
+     * @param $questionnaireId
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function detachValidationFromQuestionnaire($validationId, $questionnaireId)
+    {
+        $em = $this->getEntityManager();
+        $query = 'delete from public.questionnaire_validation where validation_id = :validation_id and questionnaire_id = :questionnaire_id';
+        $statement = $em->getConnection()->prepare($query);
+        $statement->execute([
+            'validation_id' => $validationId,
+            'questionnaire_id' => $questionnaireId
+        ]);
+    }
+
+    /**
+     * @param $validationId
+     * @return array
+     */
     public function getQuestionnairesIdForValidation($validationId)
     {
         $questionnairesId = $this->getEntityManager()->createQueryBuilder()
