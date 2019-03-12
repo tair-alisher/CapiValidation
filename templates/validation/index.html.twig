@@ -26,7 +26,7 @@
           <td>{{ validation.title }}</td>
           <td class="btn-group" role="group">
             {#<a href="" class="btn btn-primary">Редактировать</a>#}
-            <a href="{{ path('validation.details', {id: validation.id}) }}" class="btn btn-primary">Просмотреть</a>
+            <a href="{{ path('validation.details', {id: validation.id}) }}" class="btn btn-primary">Просмотреть/Редактировать</a>
             <button type="button" class="btn btn-danger remove-validation" data-id="{{ validation.id }}">Удалить</button>
           </td>
         </tr>
@@ -66,7 +66,7 @@
 {% endblock %}
 
 {% block javascripts %}
-    {{ parent() }}
+  {{ parent() }}
   <script>
       handleRemoveValidationBtnClick();
   </script>

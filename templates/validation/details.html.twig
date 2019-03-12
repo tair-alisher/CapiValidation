@@ -3,8 +3,10 @@
 {% block title %}Контроль{% endblock %}
 
 {% block body %}
-<div class="wrapper">
-  <h4>{{ validation.title }}</h4>
+<div class="wrapper" id="wrapper">
+  <div id="validation-title-block">
+    <h4><span id="validation-title">{{ validation.title }}</span> <button data-id="{{ validation.id }}" class="btn btn-primary rename-validation">Переименовать</button></h4>
+  </div>
   <hr>
   <div class="answer">
     <p><b><i>Проверяемый ответ</i></b></p>
@@ -96,4 +98,11 @@
   </div>
   <a href="{{ path('validation') }}" class="btn btn-secondary">К списку контролей</a>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script>
+    handleRenameValidationBtnClick();
+  </script>
 {% endblock %}

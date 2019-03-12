@@ -139,6 +139,21 @@ class Validator
     }
 
     /**
+     * @param $validationId
+     * @param $name
+     * @throws \Exception
+     */
+    public function renameValidation($validationId, $name)
+    {
+        $validation = $this->em->getRepository(Validation::class)->find($validationId);
+        if (!$validation) {
+            throw new \Exception('Validation with id "' . $validationId . '" not found.');
+        }
+        $validation->setTitle($name);
+        $this->em->flush();
+    }
+
+    /**
      * Validates questionnaire's interview data for a specific month
      *
      * @param string

@@ -191,6 +191,87 @@ function handleRemoveValidationBtnClick() {
     });
 }
 
+function handleRenameValidationBtnClick() {
+  $(document).ready(function() {
+    $('.rename-validation').click(function () {
+      let validationId = $(this).data('id');
+      $('#validation-title-block').hide();
+
+      let renameInput = document.createElement('input');
+      renameInput.className = 'form-control';
+      renameInput.id = 'new-validation-title';
+      renameInput.name = 'validation-title';
+      renameInput.type = 'text';
+      renameInput.dataset.id = validationId;
+      renameInput.value = document.getElementById('validation-title').innerText;
+
+      let renameInputDiv = document.createElement('div');
+      renameInputDiv.className = 'col-md-10';
+      renameInputDiv.append(renameInput);
+
+      let renameSubmitBtn = document.createElement('button');
+      renameSubmitBtn.className = 'btn btn-primary';
+      renameSubmitBtn.innerText = 'Сохранить';
+      renameSubmitBtn.type = 'button';
+      renameSubmitBtn.addEventListener('click', handleRenameValidationSubmit);
+      renameSubmitBtn.dataset.id = validationId;
+
+      let cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn btn-danger';
+      cancelBtn.innerText = 'Отмена';
+      cancelBtn.type = 'button';
+      cancelBtn.addEventListener('click', removeRenameForm);
+
+      let renameBtnGroup = document.createElement('div');
+      renameBtnGroup.className = 'btn-group col-md-2';
+      renameBtnGroup.append(renameSubmitBtn);
+      renameBtnGroup.append(cancelBtn);
+
+      let renameDiv = document.createElement('div');
+      renameDiv.className = 'row';
+      renameDiv.id = 'rename-block';
+      renameDiv.append(renameInputDiv);
+      renameDiv.append(renameBtnGroup);
+
+      $('#wrapper').prepend(renameDiv);
+    });
+  });
+}
+
+function handleRenameValidationSubmit() {
+  let validationId = $(this).data('id');
+  let name = document.getElementById('new-validation-title').value;
+
+  $.ajax({
+    url: '/validation/rename',
+    type: 'POST',
+    data: {
+      'validationId': validationId,
+      'name': name
+    },
+
+    success: function (response) {
+      if (response.success) {
+        document.getElementById('validation-title').innerText = name;
+        $('#rename-block').remove();
+        $('#validation-title-block').show();
+      } else {
+        alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+        console.log(response.message);
+      }
+    },
+    error: function (xhr) {
+      alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+      console.log(xhr.responseText);
+    }
+  });
+}
+
+function removeRenameForm() {
+  $('#rename-block').remove();
+  $('#validation-title-block').show();
+}
+
 function goToPage() {
     $(document).ready(function () {
         $('#go-to-page-btn').click(function () {

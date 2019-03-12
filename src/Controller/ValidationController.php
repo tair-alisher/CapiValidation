@@ -166,6 +166,28 @@ class ValidationController extends AbstractController
     }
 
     /**
+     * @Route("/validation/rename")
+     */
+    public function rename(Request $request, Validator $validator)
+    {
+        $validationId = $request->request->get('validationId');
+        $name = $request->request->get('name');
+        $response = array(
+            'success' => true,
+            'message' => ''
+        );
+
+        try {
+            $validator->renameValidation($validationId, $name);
+            return new JsonResponse($response);
+        } catch (\Exception $e) {
+            $response['success'] = false;
+            $response['message'] = $e->getMessage();
+            return new JsonResponse($response);
+        }
+    }
+
+    /**
      * @Route("/validation/test", name="validation.test")
      */
     public function test(Getter $getter)
