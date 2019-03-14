@@ -16,7 +16,16 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
+/**
+ * Class ValidationController
+ * @package App\Controller
+ *
+ * Require ROLE_USER for every controller method in this class.
+ *
+ * @IsGranted("ROLE_USER")
+ */
 class ValidationController extends AbstractController
 {
     /**
