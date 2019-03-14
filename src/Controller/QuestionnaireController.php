@@ -2,10 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\Main\ValidationError;
 use App\Entity\Remote\Questionnaire;
 use App\Repository\Main\ValidationErrorRepository as ErrorRepo;
 use App\Repository\Remote\QuestionnaireRepository as QuestRepo;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 class QuestionnaireController extends AbstractController
@@ -45,5 +48,28 @@ class QuestionnaireController extends AbstractController
             'id' => $id,
             'title' => $questionnaireTitle
         ]);
+    }
+
+    /**
+     * @Route("/questionnaires/errors/delete")
+     */
+    public function deleteError(Request $request)
+    {
+        $errorId = $request->request->get('id');
+        $response = ['success' => true, 'message' => ''];
+
+        try {
+            $em = $this->getDoctrine()->getManager();
+            $error = $em->getRepository(ValidationError::class)->find($errorId);
+            if ($error != null) {
+                $em->remove($error);
+                $em->flush();
+            }
+        } catch (\Exception $e) {
+            $response['success'] = false;
+            $response['message'] = $e->getMessage();
+        }
+
+        return new JsonResponse($response);
     }
 }

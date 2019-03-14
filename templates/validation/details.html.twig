@@ -3,8 +3,11 @@
 {% block title %}Контроль{% endblock %}
 
 {% block body %}
-<div class="wrapper">
-  <h4>{{ validation.title }}</h4>
+<div class="wrapper" id="wrapper">
+  <div id="validation-title-block">
+    <h4><span id="validation-title">{{ validation.title }}</span> <button data-id="{{ validation.id }}" class="btn btn-primary rename-validation">Переименовать</button></h4>
+  </div>
+  <input type="hidden" name="validation-id" id="validation-id" value="{{ validation.id }}">
   <hr>
   <div class="answer">
     <p><b><i>Проверяемый ответ</i></b></p>
@@ -27,6 +30,7 @@
   </div>
   <hr>
 
+  {% if validation.relAnswerCode != null %}
   <div class="related-question">
     <p><b><i>Зависит от ответа</i></b></p>
     <div class="row">
@@ -55,6 +59,7 @@
     </div>
   </div>
   <hr>
+  {% endif %}
 
   <div class="compared-values">
     <p><b><i>Сравниваемые значения</i></b></p>
@@ -84,14 +89,27 @@
   </div>
   <hr>
 
-  <div class="questionnaires">
+  <div class="questionnaires" id="questionnaires">
     <p><b><i>Относится к опросникам</i></b></p>
-    <ul>
+    <table id="questionnaires-list">
       {% for questionnaire in questionnaires %}
-        <li>{{ questionnaire.title }}</li>
+        <tr id="questionnaire-{{ questionnaire.id }}">
+          <td>{{ questionnaire.title }}</td>
+          <td><button type="button" class="btn btn-danger detach-questionnaire-btn" onclick="handleDetachQuestionnaireBtnClick('{{ questionnaire.id }}')">Открепить</button></td>
+        </tr>
       {% endfor %}
-    </ul>
+    </table>
+    <button class="btn btn-primary attach-questionnaire-btn" id="attach-questionnaire-btn">Добавить</button>
   </div>
+  <br>
   <a href="{{ path('validation') }}" class="btn btn-secondary">К списку контролей</a>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script>
+    handleRenameValidationBtnClick();
+    handleAttachQuestionnaireBtnClick();
+  </script>
 {% endblock %}

@@ -60,6 +60,7 @@ class QuestionnaireRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('q')
             ->where('q.id IN (:ids)')
+            ->orderBy('q.title')
             ->setParameter('ids', $questionnairesId)
             ->getQuery()
             ->getResult();

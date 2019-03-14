@@ -8,7 +8,7 @@ use Doctrine\Common\Collection\Collection;
 
 /**
  * @ORM\Table(name="readside.interviews")
- * @ORM\Entity(repositoryClass="App\Repsitory\Remote\InterviewRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\Remote\InterviewRepository")
  */
 class Interview
 {

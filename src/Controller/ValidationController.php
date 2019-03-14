@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Main\QuestionnaireValidation;
 use App\Service\Getter;
 use App\Form\ValidateType;
 use App\Service\Validator;
@@ -11,6 +12,7 @@ use App\Repository\Main\ValidationRepository;
 use App\Repository\Remote\InterviewRepository;
 use App\Repository\Remote\QuestionnaireRepository as QuestRepo;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,7 +20,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class ValidationController extends AbstractController
 {
     /**
-     * @Route("/validation", name="validation", methods={"GET", "POST"})
+     * @Route("/validation/{page}", name="validation", requirements={"page"="\d+"}, methods={"GET", "POST"})
      */
     public function index(ValidationRepository $validationRepository, Request $request, $page = 1)
     {
@@ -166,6 +168,78 @@ class ValidationController extends AbstractController
     }
 
     /**
+     * @Route("/validation/rename")
+     */
+    public function rename(Request $request, Validator $validator)
+    {
+        $validationId = $request->request->get('validationId');
+        $name = $request->request->get('name');
+
+        $response = ['success' => true, 'message' => ''];
+
+        try {
+            $validator->renameValidation($validationId, $name);
+        } catch (\Exception $e) {
+            $response['success'] = false;
+            $response['message'] = $e->getMessage();
+        }
+
+        return new JsonResponse($response);
+    }
+
+    /**
+     * @Route("/validation/detach")
+     */
+    public function detach(Request $request, Validator $validator)
+    {
+        $validationId = $request->request->get('validationId');
+        $questionnaireId = $request->request->get('questionnaireId');
+
+        $response = ['success' => true, 'message' => ''];
+
+        try {
+            $validator->detachValidation($validationId, $questionnaireId);
+        } catch (\Exception $e) {
+            $response['success'] = false;
+            $response['message'] = $e->getMessage();
+        }
+
+        return new JsonResponse($response);
+    }
+
+    /**
+     * @Route("/validation/get-questionnaires-list")
+     */
+    public function getQuestionnairesList(QuestRepo $questRepo)
+    {
+        $questionnaires = $questRepo->getTitleIdArray();
+
+        return $this->render('validation/questionnaire_list.html.twig', [
+            'questionnaires' => $questionnaires
+        ]);
+    }
+
+    /**
+     * @Route("/validation/attach")
+     */
+    public function attach(QuestRepo $questRepo, Request $request, Validator $validator)
+    {
+        $validationId = $request->request->get('validationId');
+        $questionnaireId = $request->request->get('questionnaireId');
+
+        if ($validator->questionnaireValidationAlreadyExists($validationId, $questionnaireId)) {
+           return new Response('already_exists');
+        }
+
+        $validator->attachValidation($validationId, $questionnaireId);
+        $questionnaire = $questRepo->find($questionnaireId);
+
+        return $this->render('validation/attached_questionnaire.html.twig', [
+            'questionnaire' => $questionnaire
+        ]);
+    }
+
+    /**
      * @Route("/validation/test", name="validation.test")
      */
     public function test(Getter $getter)
@@ -207,14 +281,13 @@ class ValidationController extends AbstractController
         );
 
         $questionnaireId = $data->questionnaireId;
-        $month = $data->month;
 
-        if ($validator->validate($questionnaireId, $month, $data->offset, $data->deleteCurrentErrors)) {
+        if ($validator->validate($questionnaireId, $data->offset, $data->deleteCurrentErrors)) {
             $response['completed'] = true;
             return new JsonResponse($response);
         }
 
-        $response['allRowsCount'] = $inRepo->getAllRowsCountByQuestionnaireIdAndMonth($questionnaireId, $month);
+        $response['allRowsCount'] = $inRepo->getAllRowsCountByQuestionnaireId($questionnaireId);
 
         return new JsonResponse($response);
     }

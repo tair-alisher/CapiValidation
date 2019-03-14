@@ -18,9 +18,12 @@
       </thead>
       <tbody>
       {% for error in errors %}
-        <tr>
+        <tr id="error-{{ error.id }}">
           <td>{{ error.description }}</td>
-          <td><a href="http://capi.stat.kg/Interview/Review/{{ error.interviewId }}" target="_blank" class="btn btn-primary">Просмотреть интервью</a></td>
+          <td class="btn-group">
+            <a href="http://capi.stat.kg/Interview/Review/{{ error.interviewId }}" target="_blank" class="btn btn-primary">Просмотреть интервью</a>
+            <button class="btn btn-danger delete-error-btn" type="button" data-id="{{ error.id }}">Удалить</button>
+          </td>
         </tr>
       {% endfor %}
       </tbody>
@@ -87,11 +90,13 @@
     </div>
   {% endif %}
 </div>
+  {% include 'validation/processing.html' %}
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
   <script>
       goToPage();
+      handleDeleteErrorBtnClick();
   </script>
 {% endblock %}

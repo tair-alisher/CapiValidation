@@ -156,9 +156,10 @@ function saveValidation() {
 function handleRemoveValidationBtnClick() {
     $(document).ready(function () {
         $('.remove-validation').click(function () {
-            let confirmed = confirm('Вы уверены, что хотите удалить контроль?');
+            var confirmed = confirm('Вы уверены, что хотите удалить контроль?');
             if (confirmed) {
-              let validationId = $(this).data('id');
+              showProcessingModal();
+              var validationId = $(this).data('id');
 
               $.ajax({
                 url: '/validation/delete',
@@ -166,17 +167,23 @@ function handleRemoveValidationBtnClick() {
                 data: { 'id': validationId },
 
                 success: function (response) {
-                  if (response.success) {
-                    $('#validation-' + validationId).remove();
-                    alert('Контроль успешно удален.');
-                  } else {
-                    alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
-                    console.log(response.message);
-                  }
+                  setTimeout(function () {
+                    hideProcessingModal();
+                    if (response.success) {
+                      $('#validation-' + validationId).remove();
+                      alert('Контроль успешно удален.');
+                    } else {
+                      alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+                      console.log(response.message);
+                    }
+                  }, 500)
                 },
                 error: function (xhr) {
-                  alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
-                  console.log(xhr.responseText);
+                  setTimeout(function () {
+                    hideProcessingModal();
+                    alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+                    console.log(xhr.responseText);
+                  }, 500);
                 }
               });
             }
@@ -184,11 +191,216 @@ function handleRemoveValidationBtnClick() {
     });
 }
 
+function handleRenameValidationBtnClick() {
+  $(document).ready(function() {
+    $('.rename-validation').click(function () {
+      var validationId = $(this).data('id');
+      $('#validation-title-block').hide();
+
+      var renameInput = document.createElement('input');
+      renameInput.className = 'form-control';
+      renameInput.id = 'new-validation-title';
+      renameInput.name = 'validation-title';
+      renameInput.type = 'text';
+      renameInput.dataset.id = validationId;
+      renameInput.value = document.getElementById('validation-title').innerText;
+
+      var renameInputDiv = document.createElement('div');
+      renameInputDiv.className = 'col-md-10';
+      renameInputDiv.append(renameInput);
+
+      var renameSubmitBtn = document.createElement('button');
+      renameSubmitBtn.className = 'btn btn-primary';
+      renameSubmitBtn.innerText = 'Сохранить';
+      renameSubmitBtn.type = 'button';
+      renameSubmitBtn.addEventListener('click', handleRenameValidationSubmit);
+      renameSubmitBtn.dataset.id = validationId;
+
+      var cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn btn-danger';
+      cancelBtn.innerText = 'Отмена';
+      cancelBtn.type = 'button';
+      cancelBtn.addEventListener('click', removeRenameForm);
+
+      var renameBtnGroup = document.createElement('div');
+      renameBtnGroup.className = 'btn-group col-md-2';
+      renameBtnGroup.append(renameSubmitBtn);
+      renameBtnGroup.append(cancelBtn);
+
+      var renameDiv = document.createElement('div');
+      renameDiv.className = 'row';
+      renameDiv.id = 'rename-block';
+      renameDiv.append(renameInputDiv);
+      renameDiv.append(renameBtnGroup);
+
+      $('#wrapper').prepend(renameDiv);
+    });
+  });
+}
+
+function handleRenameValidationSubmit() {
+  var validationId = $(this).data('id');
+  var name = document.getElementById('new-validation-title').value;
+
+  $.ajax({
+    url: '/validation/rename',
+    type: 'POST',
+    data: {
+      'validationId': validationId,
+      'name': name
+    },
+
+    success: function (response) {
+      if (response.success) {
+        document.getElementById('validation-title').innerText = name;
+        $('#rename-block').remove();
+        $('#validation-title-block').show();
+      } else {
+        alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+        console.log(response.message);
+      }
+    },
+
+    error: function (xhr) {
+      alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+      console.log(xhr.responseText);
+    }
+  });
+}
+
+function removeRenameForm() {
+  $('#rename-block').remove();
+  $('#validation-title-block').show();
+}
+
+function handleDetachQuestionnaireBtnClick(questionnaireId) {
+  var validationId = document.getElementById('validation-id').value;
+
+  $.ajax({
+    url: '/validation/detach',
+    type: 'POST',
+    data: {
+      'validationId': validationId,
+      'questionnaireId': questionnaireId
+    },
+
+    success: function (response) {
+      if (response.success) {
+        var rowToDelete = document.getElementById('questionnaire-' + questionnaireId);
+        rowToDelete.parentElement.removeChild(rowToDelete);
+      } else {
+        alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+        console.log(response.message);
+      }
+    },
+
+    error: function (xhr) {
+      alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+      console.log(xhr.responseText);
+    }
+  });
+}
+
+function handleAttachQuestionnaireBtnClick() {
+  $(document).ready(function () {
+    $('.attach-questionnaire-btn').click(function () {
+      $.ajax({
+        url: '/validation/get-questionnaires-list',
+        type: 'GET',
+        success: function (html) {
+          $('#attach-questionnaire-btn').hide();
+          $('#questionnaires').append(html);
+        },
+        error: function (xhr) {
+          alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+          console.log(xhr.responseText);
+        }
+      });
+    });
+  });
+}
+
+function attachQuestionnaireSubmit() {
+  var questionnaireId = document.getElementById('questionnaire-id').value;
+  var validationId = document.getElementById('validation-id').value;
+
+  $.ajax({
+    url: '/validation/attach',
+    type: 'POST',
+    data: {
+      'validationId': validationId,
+      'questionnaireId': questionnaireId
+    },
+
+    success: function (html) {
+      if (html === 'already_exists') {
+        $('#questionnaires-dropdown').remove();
+        $('#attach-questionnaire-btn').show();
+        alert('Валидация уже прикреплена к данному опроснику.');
+      } else {
+        $('#questionnaires-dropdown').remove();
+        $('#questionnaires-list').append(html);
+        $('#attach-questionnaire-btn').show();
+      }
+
+    },
+
+    error: function (xhr) {
+      alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+      console.log(xhr.responseText);
+    }
+  })
+}
+
+function removeAttachQuestionnaireForm() {
+  $('#questionnaires-dropdown').remove();
+  $('#attach-questionnaire-btn').show();
+}
+
+function handleDeleteErrorBtnClick() {
+  $(document).ready(function () {
+    $('.delete-error-btn').click(function () {
+      var confirmed = confirm('Вы уверены, что хотите удалить запись?');
+      if (confirmed) {
+        showProcessingModal();
+        var errorId = $(this).data('id');
+
+        $.ajax({
+          url: '/questionnaires/errors/delete',
+          type: 'POST',
+          data: {'id': errorId },
+
+          success: function (response) {
+            setTimeout(function () {
+              hideProcessingModal();
+              if (response.success) {
+                $('#error-' + errorId).remove();
+                alert('Запись удалена.')
+              } else {
+                alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+                console.log(response.message);
+              }
+            }, 500);
+          },
+
+          error: function (xhr) {
+            setTimeout(function () {
+              hideProcessingModal();
+              alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+              console.log(xhr.responseText);
+            }, 500);
+          }
+        });
+      }
+    });
+  });
+}
+
 function goToPage() {
     $(document).ready(function () {
         $('#go-to-page-btn').click(function () {
-            let page = $('#page-value').val();
-            let questionnaireId = $(this).data('id');
+            var page = $('#page-value').val();
+            var questionnaireId = $(this).data('id');
 
             window.location.href='/questionnaire/' + questionnaireId + '/errors/' + page;
         })
@@ -196,18 +408,17 @@ function goToPage() {
 }
 
 function startValidate(deleteCurrentErrors = true, offset = 0) {
-    let questionnaireId = $('#validate_questionnaire').val();
-    let month = $('#validate_month').val();
-    let data = {
+    $('#start-validate-btn').attr('disabled', 'disabled');
+    var questionnaireId = $('#validate_questionnaire').val();
+    var data = {
         'questionnaireId': questionnaireId,
-        'month': month,
         'offset': offset,
         'deleteCurrentErrors': deleteCurrentErrors
     };
 
-    let progressIndicator = $('#progress-indicator');
+    var progressIndicator = $('#progress-indicator');
     if (!progressIndicator.length) {
-        let alertBlock = document.createElement('div');
+        var alertBlock = document.createElement('div');
         alertBlock.className = 'alert alert-primary';
         alertBlock.id = 'progress-indicator';
         alertBlock.setAttribute('role', 'alert');
@@ -225,8 +436,8 @@ function startValidate(deleteCurrentErrors = true, offset = 0) {
             if (response.completed) {
                 window.location.href='/questionnaire/' + questionnaireId + '/errors';
             } else {
-                let allRowsCount = response.allRowsCount;
-                let checkedRowsPercent = (offset * 100) / allRowsCount;
+                var allRowsCount = response.allRowsCount;
+                var checkedRowsPercent = (offset * 100) / allRowsCount;
                 $('#progress-indicator').text('Прогресс (%): ' + Math.round(checkedRowsPercent) + '/100');
 
                 startValidate(false, offset += 1000);
