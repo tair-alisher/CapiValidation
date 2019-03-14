@@ -162,7 +162,7 @@ function handleRemoveValidationBtnClick() {
               var validationId = $(this).data('id');
 
               $.ajax({
-                url: '/validation/devare',
+                url: '/validation/delete',
                 type: 'POST',
                 data: { 'id': validationId },
 
@@ -357,6 +357,45 @@ function removeAttachQuestionnaireForm() {
   $('#attach-questionnaire-btn').show();
 }
 
+function handleDeleteErrorBtnClick() {
+  $(document).ready(function () {
+    $('.delete-error-btn').click(function () {
+      var confirmed = confirm('Вы уверены, что хотите удалить запись?');
+      if (confirmed) {
+        showProcessingModal();
+        var errorId = $(this).data('id');
+
+        $.ajax({
+          url: '/questionnaires/errors/delete',
+          type: 'POST',
+          data: {'id': errorId },
+
+          success: function (response) {
+            setTimeout(function () {
+              hideProcessingModal();
+              if (response.success) {
+                $('#error-' + errorId).remove();
+                alert('Запись удалена.')
+              } else {
+                alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+                console.log(response.message);
+              }
+            }, 500);
+          },
+
+          error: function (xhr) {
+            setTimeout(function () {
+              hideProcessingModal();
+              alert('Произошла ошибка. Перезагрузите страницу и попробуйте еще раз.');
+              console.log(xhr.responseText);
+            }, 500);
+          }
+        });
+      }
+    });
+  });
+}
+
 function goToPage() {
     $(document).ready(function () {
         $('#go-to-page-btn').click(function () {
@@ -368,13 +407,13 @@ function goToPage() {
     })
 }
 
-function startValidate(devareCurrentErrors = true, offset = 0) {
+function startValidate(deleteCurrentErrors = true, offset = 0) {
     $('#start-validate-btn').attr('disabled', 'disabled');
     var questionnaireId = $('#validate_questionnaire').val();
     var data = {
         'questionnaireId': questionnaireId,
         'offset': offset,
-        'devareCurrentErrors': devareCurrentErrors
+        'deleteCurrentErrors': deleteCurrentErrors
     };
 
     var progressIndicator = $('#progress-indicator');
@@ -394,7 +433,7 @@ function startValidate(devareCurrentErrors = true, offset = 0) {
         data: JSON.stringify(data),
 
         success: function (response) {
-            if (response.compvared) {
+            if (response.completed) {
                 window.location.href='/questionnaire/' + questionnaireId + '/errors';
             } else {
                 var allRowsCount = response.allRowsCount;
