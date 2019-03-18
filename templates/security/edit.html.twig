@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Редактировать данные пользователя{% endblock %}
+
+{% block body %}
+  {{ form_start(editForm) }}
+  <h1>Данные пользователя</h1>
+  {{ form_row(editForm.username) }}
+
+  <div class="form-group">
+    <label for="role">Роль</label>
+    <select name="role" id="role" class="form-control">
+      {% for role in roles %}
+        <option value="{{ role.id }}"{{ role.name == userRole ? ' selected' : '' }}>{{ role.title }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="clearfix">
+    <a href="{{ path('user_management') }}" class="btn btn-outline-secondary">К списку пользователей</a>
+    <button class="btn btn-primary float-right" type="submit">Сохранить</button>
+  </div>
+  {{ form_end(editForm) }}
+{% endblock %}

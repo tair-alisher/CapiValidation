@@ -22,26 +22,26 @@ class QuestionnaireRepository extends ServiceEntityRepository
         return $this->findBy(array(), array('title' => 'ASC'));
     }
 
-    public function getAllQuestionnaires($currentPage = 1, $limit = 10): object
+    public function getAllQuestionnaires($currentPage = 1, $limit = 10)
     {
         $query = $this->createQueryBuilder('q')
             ->orderBy('q.title', 'ASC')
             ->getQuery();
 
-        $paginator = $this->paginate($query, $currentPage, $limit);
+        $pageDivider = $this->paginate($query, $currentPage, $limit);
 
-        return $paginator;
+        return $pageDivider;
     }
 
     public function paginate($dql, $page = 1, $limit)
     {
-        $paginator = new Paginator($dql);
+        $pageDivider = new Paginator($dql);
 
-        $paginator->getQuery()
+        $pageDivider->getQuery()
             ->setFirstResult($limit * ($page - 1))
             ->setMaxResults($limit);
 
-        return $paginator;
+        return $pageDivider;
     }
 
     public function getTitleIdArray(): array
