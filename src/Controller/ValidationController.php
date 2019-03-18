@@ -22,8 +22,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
  * Class ValidationController
  * @package App\Controller
  *
- * Require ROLE_USER for every controller method in this class.
- *
  * @IsGranted("ROLE_USER")
  */
 class ValidationController extends AbstractController
@@ -33,6 +31,7 @@ class ValidationController extends AbstractController
      */
     public function index(ValidationRepository $validationRepository, Request $request, $page = 1)
     {
+        $this->denyAccessUnlessGranted('ROLE_USER');
         $limit = 10;
         $searchValue = $request->request->get('value');
         if ($searchValue) {

@@ -9,7 +9,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 /**
  * @ORM\Table(name="public.user")
  * @ORM\Entity(repositoryClass="App\Repository\Main\UserRepository")
- * @UniqueEntity(fields={"username"}, message="There is already an account with this username")
+ * @UniqueEntity(fields={"username"}, message="Пользователь с таким логином уже существует.")
  */
 class User implements UserInterface
 {

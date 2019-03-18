@@ -34,6 +34,18 @@
             <a href="{{ path('user_management') }}" class="nav-link">Пользователи</a>
           </li>
         </ul>
+        <ul class="navbar-nav">
+          {% if app.user %}
+            <span class="navbar-text">Вы вошли как <b>{{ app.user.username }}</b>.</span>
+            <li class="nav-item">
+              <a href="{{ path('app_logout') }}" class="nav-link">Выйти</a>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a href="{{ path('app_login') }}" class="nav-link">Войти</a>
+            </li>
+          {% endif %}
+        </ul>
       </div>
     </div>
   </nav>

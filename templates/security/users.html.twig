@@ -8,10 +8,18 @@
     <hr>
     <a href="{{ path('app_register') }}" class="btn btn-primary">Зарегистрировать пользователя</a>
     <hr>
-    <table class="table-sm table-striped">
+    <table class="table-sm">
+      <tr>
+        <th>Пользователь</th>
+        <th></th>
+      </tr>
       {% for user in users %}
         <tr>
           <td>{{ user.username }}</td>
+          <td class="btn-group">
+            <a href="{{ path('user_edit', {id: user.id}) }}" class="btn btn-primary">Редактировать</a>
+            <a href="{{ path('user_delete', {id: user.id}) }}" class="btn btn-danger" onclick="return confirm('Удалить пользователя?');">Удалить</a>
+          </td>
         </tr>
       {% endfor %}
     </table>

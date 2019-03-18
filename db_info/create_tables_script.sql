@@ -180,6 +180,29 @@ ALTER TABLE public.questionnaire_validation
   OWNER to postgres;
 
 
+-- role table
+CREATE TABLE public.role
+(
+  id integer NOT NULL,
+  name character varying(30) COLLATE pg_catalog."default" NOT NULL,
+  title character varying(100) COLLATE pg_catalog."default" NOT NULL,
+  CONSTRAINT role_pkey PRIMARY KEY (id)
+)
+WITH (
+OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.role
+  OWNER to postgres;
+
+-- insert roles
+INSERT INTO public.role(id, name, title)
+VALUES (1, 'ROLE_USER', 'пользователь');
+INSERT INTO public.role(id, name, title)
+VALUES (2, 'ROLE_ADMIN', 'администратор');
+
+
 -- user table
 CREATE SEQUENCE user_id_seq INCREMENT BY 1 MINVALUE 1 START 1;
 

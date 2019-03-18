@@ -7,6 +7,14 @@
         <h1>Регистрация</h1>
         {{ form_row(registrationForm.username) }}
         {{ form_row(registrationForm.plainPassword) }}
+        <div class="form-group">
+            <label for="role">Роль</label>
+            <select name="role" id="role" class="form-control">
+                {% for role in roles %}
+                    <option value="{{ role.id }}">{{ role.title }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
         <div class="clearfix">
             <button class="btn btn-primary float-right">Зарегистрировать</button>

@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: atairakhunov
- * Date: 014, 14 мар 2019
- * Time: 14:45
- */
 
 namespace App\Service;
 
@@ -27,5 +21,17 @@ class UserManager
     public function getUsersList($page = 1, $limit = 10)
     {
         return $this->userRepo->getUsersListByPagesSortedByName($page, $limit);
+    }
+
+    public function get($id): User
+    {
+        return $this->userRepo->find($id);
+    }
+
+    public function remove($id)
+    {
+        $user = $this->get($id);
+        $this->em->remove($user);
+        $this->em->flush();
     }
 }
